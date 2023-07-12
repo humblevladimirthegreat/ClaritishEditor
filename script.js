@@ -4,7 +4,7 @@ var filenameBox = document.querySelector('#filename');
 
 // Automatically load/save cache in local storage when opening and closing the page
 textbox.value = localStorage.getItem('browserpad') || '';
-textbox.setSelectionRange(textbox.value.length, textbox.value.length); // Place caret at end of content
+//textbox.setSelectionRange(textbox.value.length, textbox.value.length); // Place caret at end of content
 calcStats(); // Update counters after loading
 function storeLocally() { localStorage.setItem('browserpad', textbox.value); }
 window.beforeunload = storeLocally;
@@ -25,6 +25,40 @@ textbox.onkeyup = function () {
     window.clearTimeout(timeoutID); // Prevent saving too frequently
     timeoutID = window.setTimeout(storeLocally, 1000);
 };
+
+textbox.addEventListener('input', function (event) {
+    let text = event.target.textContent
+
+    console.debug("current text is:", text)
+    
+    const selection = window.getSelection();
+    const range = selection.getRangeAt(0);
+    const startOffset = range.startOffset;
+    
+    textbox.innerHTML = check_claritish(text)
+
+    // Restore cursor position
+    const newRange = document.createRange();
+    const newSelection = window.getSelection();
+    const nodes = event.target.childNodes;
+    let node;
+    let offset = 0;
+    for (let i = 0; i < nodes.length; i++) {
+      node = nodes[i];
+      if (node.nodeType === Node.TEXT_NODE) {
+        offset += node.length;
+      } else if (node.nodeType === Node.ELEMENT_NODE) {
+        const className = node.getAttribute('class');
+        if (className === 'blue-squiggle') {
+          break;
+        }
+      }
+    }
+    newRange.setStart(node, startOffset);
+    newRange.setEnd(node, startOffset);
+    newSelection.removeAllRanges();
+    newSelection.addRange(newRange);
+});
 
 // Calculate and display character, words and line counts
 function calcStats() {
@@ -80,6 +114,23 @@ document.onkeydown = function (event) {
         }
     }
 }
+
+// handle Claritish checking. Returns the HTML to replace the content with
+check_claritish = function(text) {
+    console.debug('current value:', text)
+
+    const regex = /\bI\b/g;
+
+    const matches = text.match(regex);
+
+    if (matches && matches.length > 0) {
+      const highlightedText = text.replace(regex, '<span class="blue-squiggle" data-tooltip="Don\'t use the word I">$&</span>');
+      console.debug('set innerHtml to', highlightedText)
+      return highlightedText;
+    } else {
+      return text;
+    }
+  };
 
 // Show the about dialog
 document.querySelector("#about-icon").onclick = function () {
