@@ -3,22 +3,30 @@ const expressions = [{
         // checks for hello with value
         regex: /^(?!hello[-+]\w+)/i,
         advice: "You must begin your text with <b>Hello+[value]</b>."
-    }, {
+    }, {    
+        // checks for goodbye with value
+        // regex: /(?<!goodbye[-+]\w+)$/i,
+        // advice: "You must end your text with <b>Goodbye+[value]</b>."
+    // }, {
         // checks for first-person pronoun not followed by value +/- marker
-        regex: /\b(I|me|my)(?![-+]\w+)/gi,
+        regex: /\b(I|me|my|myself)(?![-+]\w+)\b/gi,
         advice: "Replace <b>{match}</b> with <b>{match}+[value]</b>."
     }, {
         // checks for negative value not followed by silver lining
-        regex: /\b(I|me|my)\-\w+\b(?!\+\w+)/gi, 
+        regex: /\b(I|me|my|myself)\-\w+\b(?!\+\w+)/gi, 
         advice: "Replace <b>{match}</b> with <b>{match}+[value]</b>."
     }, {    
         // checks for 'or'
         regex: /\bor\b/i,
-        advice: "Replace <b>{match}</b> with <b>xor</b> or <b>ior</b>."
+        advice: "Replace <b>{match}</b> with <b>eor</b> or <b>ior</b>."
     }, {    
-        // checks for goodbye with value
-        regex: /(?<!goodbye[-+]\w+)$/i,
-        advice: "You must end your text with <b>Goodbye+[value]</b>."
+        // checks for past/future tense
+        regex: /\b(will|\w+'ll|shall|had|did|was|were|used)\b/i,
+        advice: "Replace <b>{match}</b> with a tense word."
+    // }, {    
+        // checks for subjunctive mood
+        // regex: /\b(if|that|would)\b/i,
+        // advice: "Replace <b>{match}</b> with a mood word."
     }, 
   ];
   
@@ -32,6 +40,10 @@ textbox.setSelectionRange(textbox.value.length, textbox.value.length); // Place 
 calcStats(); // Update counters after loading
 function storeLocally() { localStorage.setItem('browserpad', textbox.value); }
 window.beforeunload = storeLocally;
+
+// Set the filename placeholder to have the date as YYYY_MM_DD
+const dateString = new Date().toISOString().slice(0,10);
+filenameBox.placeholder = "claritish_" + dateString + ".txt";
 
 // Allow inputting tabs in the textarea instead of changing focus to the next element
 textbox.onkeypress = function (event) {
@@ -90,8 +102,8 @@ function updateCount(item, value) {
 }
 
 // Save textarea contents as a text file
-document.querySelector('#save a').onclick = function () {
-    this.download = (filenameBox.value || 'browserpad.txt').replace(/^([^.]*)$/, "$1.txt");
+document.querySelector('#download a').onclick = function () {
+    this.download = (filenameBox.value || filenameBox.placeholder).replace(/^([^.]*)$/, "$1.txt");
     this.href = URL.createObjectURL(new Blob([document.querySelector('#textbox').value], { type: 'text/plain' }));
 };
 
