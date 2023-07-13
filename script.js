@@ -1,6 +1,21 @@
 // List of regex checks 
-const expressions = [
-    {regex: /\b(I|me|my)\b/gi, advice: "Replace '{match}' with '{match}'_[desire]. See lesson 1."},
+const expressions = [{    
+        // checks for hello with value
+        regex: /^(?!hello[-+]\w+)/i,
+        advice: "You must begin your text with <i>Hello+[value]</i>. See lesson 1."
+    }, {
+        // checks for first-person pronoun not followed by value +/- marker
+        regex: /\b(I|me|my)(?![-+]\w+)/gi,
+        advice: "Replace <i>{match}</i> with <i>{match}+[value]</i>. See lesson 2."
+    }, {
+        // checks for negative value not followed by silver lining
+        regex: /\b(I|me|my)\-\w+\b(?!\+\w+)/gi, 
+        advice: "Replace <i>{match}</i> with <i>{match}+[value]</i>. See lesson 3."
+    },{    
+        // checks for goodbye with value
+        regex: /(?<!goodbye[-+]\w+)$/i,
+        advice: "You must end your text with <i>Goodbye+[value]</i>. See lesson 1."
+    }, 
   ];
   
 var textbox = document.querySelector('#textbox');
@@ -40,7 +55,7 @@ textbox.onkeyup = function () {
         if (matches) {
             matches.forEach(match => {
                 // Create <li> for each match  
-                html += `<li>${expr.advice.replace("{match}", match)}</li>`;
+                html += `<li>${expr.advice.replaceAll("{match}", match)}</li>`;
               });
         }
       
