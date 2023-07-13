@@ -2,23 +2,23 @@
 const expressions = [{    
         // checks for hello with value
         regex: /^(?!hello[-+]\w+)/i,
-        advice: "You must begin your text with <i>Hello+[value]</i>."
+        advice: "You must begin your text with <b>Hello+[value]</b>."
     }, {
         // checks for first-person pronoun not followed by value +/- marker
         regex: /\b(I|me|my)(?![-+]\w+)/gi,
-        advice: "Replace <i>{match}</i> with <i>{match}+[value]</i>."
+        advice: "Replace <b>{match}</b> with <b>{match}+[value]</b>."
     }, {
         // checks for negative value not followed by silver lining
         regex: /\b(I|me|my)\-\w+\b(?!\+\w+)/gi, 
-        advice: "Replace <i>{match}</i> with <i>{match}+[value]</i>."
+        advice: "Replace <b>{match}</b> with <b>{match}+[value]</b>."
     }, {    
         // checks for 'or'
         regex: /\bor\b/i,
-        advice: "Replace <i>{match}</i> with <i>xor</i> or </ior>."
+        advice: "Replace <b>{match}</b> with <b>xor</b> or <b>ior</b>."
     }, {    
         // checks for goodbye with value
         regex: /(?<!goodbye[-+]\w+)$/i,
-        advice: "You must end your text with <i>Goodbye+[value]</i>."
+        advice: "You must end your text with <b>Goodbye+[value]</b>."
     }, 
   ];
   
