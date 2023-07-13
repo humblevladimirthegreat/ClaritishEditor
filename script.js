@@ -1,3 +1,8 @@
+// List of regex checks 
+const expressions = [
+    {regex: /\b(I|me|my)\b/gi, advice: "Replace '{match}' with '{match}'_[desire]. See lesson 1."},
+  ];
+  
 var textbox = document.querySelector('#textbox');
 var timeoutID = null;
 var filenameBox = document.querySelector('#filename');
@@ -24,6 +29,24 @@ textbox.onkeyup = function () {
     calcStats();
     window.clearTimeout(timeoutID); // Prevent saving too frequently
     timeoutID = window.setTimeout(storeLocally, 1000);
+
+    var html = "<ul>";
+
+    expressions.forEach(expr => {
+
+        // Get all matches 
+        const matches = textbox.value.match(expr.regex);
+      
+        if (matches) {
+            matches.forEach(match => {
+                // Create <li> for each match  
+                html += `<li>${expr.advice.replace("{match}", match)}</li>`;
+              });
+        }
+      
+      });
+    html += "</ul>"
+    advicebox.innerHTML = html;
 };
 
 // Calculate and display character, words and line counts

@@ -9,13 +9,24 @@ textarea {
 #textbox {
   background-color: transparent;
   width: 100%;
+  height: calc(50% - 1rem); 
   padding: 0.5em;
   padding-right: calc(100% - 80ch - 0.5em - 17px);
   overflow-y: scroll;
 }
+#advicebox {
+  background-color: transparent;
+  width: 100%;
+  border-top: 5px solid black; 
+  overflow-y: scroll;
+  height: calc(50% - 1rem);
+  position: absolute;
+  top: calc(50% + 1rem);
+}
 #linewidth-guide {
   border-right: 1px solid PaleTurquoise;
   width: calc(80ch + 1px);
+  height: calc(50%); 
   margin-left: 0.5em;
   position: absolute;
   z-index: -1;
