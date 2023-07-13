@@ -2,19 +2,23 @@
 const expressions = [{    
         // checks for hello with value
         regex: /^(?!hello[-+]\w+)/i,
-        advice: "You must begin your text with <i>Hello+[value]</i>. See lesson 1."
+        advice: "You must begin your text with <i>Hello+[value]</i>."
     }, {
         // checks for first-person pronoun not followed by value +/- marker
         regex: /\b(I|me|my)(?![-+]\w+)/gi,
-        advice: "Replace <i>{match}</i> with <i>{match}+[value]</i>. See lesson 2."
+        advice: "Replace <i>{match}</i> with <i>{match}+[value]</i>."
     }, {
         // checks for negative value not followed by silver lining
         regex: /\b(I|me|my)\-\w+\b(?!\+\w+)/gi, 
-        advice: "Replace <i>{match}</i> with <i>{match}+[value]</i>. See lesson 3."
-    },{    
+        advice: "Replace <i>{match}</i> with <i>{match}+[value]</i>."
+    }, {    
+        // checks for 'or'
+        regex: /\bor\b/i,
+        advice: "Replace <i>{match}</i> with <i>xor</i> or </ior>."
+    }, {    
         // checks for goodbye with value
         regex: /(?<!goodbye[-+]\w+)$/i,
-        advice: "You must end your text with <i>Goodbye+[value]</i>. See lesson 1."
+        advice: "You must end your text with <i>Goodbye+[value]</i>."
     }, 
   ];
   
@@ -54,6 +58,8 @@ textbox.onkeyup = function () {
       
         if (matches) {
             matches.forEach(match => {
+                // Escape match text 
+                const escapedMatch = escapeHtml(match);
                 // Create <li> for each match  
                 html += `<li>${expr.advice.replaceAll("{match}", match)}</li>`;
               });
@@ -63,6 +69,15 @@ textbox.onkeyup = function () {
     html += "</ul>"
     advicebox.innerHTML = html;
 };
+
+function escapeHtml(unsafeText) {
+    return unsafeText
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+  }
 
 // Calculate and display character, words and line counts
 function calcStats() {
