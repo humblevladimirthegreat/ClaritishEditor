@@ -2,21 +2,40 @@ const POS_V = "\\+\\w\\b"
 const NEG_V = "\\-\\w\\b"
 const VALUE = `(${POS_V}|${NEG_V})`
 
+const POSITIVE_WORDS = "(absorbed|accomplished|amazed|appreciative|awakened|blessed|blissful|blissfully|calm|calmer|captivated|cheerful|cheery|confident|content|contentment|curious|delighted|delightful|eagerness|eager|eagerly|elated|elation|empowered|empowerment|enchantment|encouraged|energized|engaged|engrossing|engrossment|enthralled|enthralling|entertained|enlightened|euphoria|euphoric|excited|exciting|fabulous|fascinated|fascination|festive|festivity|focused|fortunate|fulfilled|fulfilment|glad|glee|gleeful|gleefully|glorious|grateful|gratified|great|happy|happier|happiest|hopeful|incredible|inspired|interested|jubilant|jubilantly|liberated|lovely|loving|lucky|magical|merriment|motivated|optimistic|passion|passionate|passionately|peace|peaceful|perfect|playful|playfulness|pride|proud|proudly|rapt|refreshed|refreshing|rejuvenated|relieved|relieving|renewed|renewal|revitalized|revitalization|satisfaction|satisfied|terrific|thank|thanks|thankful|thrilled|thrilling|triumph|triumphant|victorious|won|wonder|wonderful|wondrous)"
+const NEGATIVE_WORDS = "(afflicted|agony|agonized|agonizing|angry|angered|angrier|angriest|anguish|anguished|annoyed|annoying|anxious|appalled|appalling|ashamed|bothered|confused|crushed|depressed|depressing|depression|despairing|despondent|destroyed|devastated|disappointed|disappointment|disgusted|disgusting|distraught|distress|distressed|disturbing|embarrassed|embarrassing|enraged|exhausted|forlorn|frustrated|fuming|grief|grieving|guilt|guilty|heartbroken|heartsick|horrified|horrifying|hurt|hurting|hysterical|inconsolable|indignant|infuriated|insecure|irate|irritated|jealous|lonely|livid|mad|miserable|mourn|mourned|mourning|nauseated|nauseous|offended|outraged|overwhelmed|panicked|panicky|paranoid|petrified|pissed|pained|provoked|regert|regretful|regretting|repulsed|resent|resentful|revolted|revolting|sad|sadder|saddest|scared|seething|shame|shamed|shattered|shocked|sickened|sickening|sorrow|stress|stressed|stunned|suicidal|terrified|terrifying|torment|tormented|troubled|troubling|unhappy|upset|upsetting|worried|wretched)"
+
 // List of regex checks 
 const expressions = [{    
-        // checks for hello with value
+        // hello with value
         regex: `^(?!hello${VALUE})`,
         advice: "You must begin your text with <b>Hello+[value]</b>."
     }, {
-        // checks for first-person pronoun not followed by value +/- marker
+        // first-person pronoun not followed by value
         regex: `\\b(I|me|my|myself)\\b(?!${VALUE})`,
-        advice: "Replace <b>{match}</b> with <b>{match}+[value]</b>."
+        advice: "Add value to <b>{match}</b>."
     }, {
-        // checks for negative value not followed by silver lining
+        // negative value not followed by silver lining
         regex: `${NEG_V}(?!${POS_V})`, 
-        advice: "Replace <b>{match}</b> with <b>{match}+[value]</b>."
+        advice: "Add silver-lining value to <b>{match}</b>."
+    }, {
+        // 3rd-person pronoun not followed by value
+        regex: `\\b(he|him|himself|she|her|herself)\\b(?!${VALUE})`,
+        advice: "Add value to <b>{match}</b>."
+    }, {
+        // positive word not followed by @
+        regex: `\\b${POSITIVE_WORDS}\\b(?!@)`,
+        advice: "Append <b>{match}</b> with the breath-marker <b>@</b> to savor the positive feeling."
+    }, {
+        // negative word not followed by @
+        regex: `\\b${NEGATIVE_WORDS}\\b(?!@)`,
+        advice: "Append <b>{match}</b> with the breath-marker <b>@</b> to ground yourself."
+    }, {
+        // negative word and @ not followed by value
+        regex: `\\b${NEGATIVE_WORDS}\\b@(?!${VALUE})`,
+        advice: "Append <b>{match}</b> with a silver-lining value to foster compassion."
     }, {    
-        // checks for 'or'
+        // 'or' -> eor, ior
         regex: /\bor\b/,
         advice: "Replace <b>{match}</b> with <b>eor</b> or <b>ior</b>."
     // }, {    

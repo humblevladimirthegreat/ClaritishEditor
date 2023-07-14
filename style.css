@@ -8,11 +8,25 @@ textarea {
 }
 #textbox {
   background-color: transparent;
-  width: 100%;
+  width: calc(80ch + 1px);
   height: calc(50% - 1rem); 
   padding: 0.5em;
-  padding-right: calc(100% - 80ch - 0.5em - 17px);
   overflow-y: scroll;
+}
+#linewidth-guide {
+  border-right: 1px solid PaleTurquoise;
+  width: calc(80ch + 1px);
+  height: calc(50%); 
+  margin-left: 0.5em;
+  position: absolute;
+  z-index: -1;
+}
+#valuehelp {
+  background-color: transparent;
+  position: absolute; 
+  top: 0;
+  left: 55ch;
+  /* border: 1px solid black;  */
 }
 #advicebox {
   background-color: transparent;
@@ -22,14 +36,6 @@ textarea {
   height: calc(50% - 1rem);
   position: absolute;
   top: calc(50% + 1rem);
-}
-#linewidth-guide {
-  border-right: 1px solid PaleTurquoise;
-  width: calc(80ch + 1px);
-  height: calc(50%); 
-  margin-left: 0.5em;
-  position: absolute;
-  z-index: -1;
 }
 nav {
   position: fixed; bottom: 0; left: 0;
