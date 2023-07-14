@@ -1,28 +1,28 @@
+const POS_V = "\\+\\w\\b"
+const NEG_V = "\\-\\w\\b"
+const VALUE = `(${POS_V}|${NEG_V})`
+
 // List of regex checks 
 const expressions = [{    
         // checks for hello with value
-        regex: /^(?!hello[-+]\w+)/i,
+        regex: `^(?!hello${VALUE})`,
         advice: "You must begin your text with <b>Hello+[value]</b>."
-    }, {    
-        // checks for goodbye with value
-        // regex: /(?<!goodbye[-+]\w+)$/i,
-        // advice: "You must end your text with <b>Goodbye+[value]</b>."
-    // }, {
+    }, {
         // checks for first-person pronoun not followed by value +/- marker
-        regex: /\b(I|me|my|myself)(?![-+]\w+)\b/gi,
+        regex: `\\b(I|me|my|myself)\\b(?!${VALUE})`,
         advice: "Replace <b>{match}</b> with <b>{match}+[value]</b>."
     }, {
         // checks for negative value not followed by silver lining
-        regex: /\b(I|me|my|myself)\-\w+\b(?!\+\w+)/gi, 
+        regex: `${NEG_V}(?!${POS_V})`, 
         advice: "Replace <b>{match}</b> with <b>{match}+[value]</b>."
     }, {    
         // checks for 'or'
-        regex: /\bor\b/i,
+        regex: /\bor\b/,
         advice: "Replace <b>{match}</b> with <b>eor</b> or <b>ior</b>."
-    }, {    
+    // }, {    
         // checks for past/future tense
-        regex: /\b(will|\w+'ll|shall|had|did|was|were|used)\b/i,
-        advice: "Replace <b>{match}</b> with a tense word."
+        // regex: /\b(will|\w+'ll|shall|had|did|was|were|used)\b/i,
+        // advice: "Replace <b>{match}</b> with a tense word."
     // }, {    
         // checks for subjunctive mood
         // regex: /\b(if|that|would)\b/i,
@@ -61,25 +61,29 @@ textbox.onkeyup = function () {
     window.clearTimeout(timeoutID); // Prevent saving too frequently
     timeoutID = window.setTimeout(storeLocally, 1000);
 
+    advicebox.innerHTML = getRegexHtml(textbox.value);
+};
+
+function getRegexHtml(text) {
     var html = "<ul>";
 
     expressions.forEach(expr => {
 
         // Get all matches 
-        const matches = textbox.value.match(expr.regex);
+        const matches = text.match(new RegExp(expr.regex), 'ig');
       
         if (matches) {
             matches.forEach(match => {
                 // Escape match text 
-                const escapedMatch = escapeHtml(match);
+                const escapedMatch = escapeHtml(match || '');
                 // Create <li> for each match  
-                html += `<li>${expr.advice.replaceAll("{match}", match)}</li>`;
+                html += `<li>${expr.advice.replaceAll("{match}", escapedMatch)}</li>`;
               });
         }
       
       });
     html += "</ul>"
-    advicebox.innerHTML = html;
+    return html;
 };
 
 function escapeHtml(unsafeText) {
@@ -89,7 +93,7 @@ function escapeHtml(unsafeText) {
       .replace(/>/g, "&gt;")
       .replace(/"/g, "&quot;")
       .replace(/'/g, "&#039;");
-  }
+};
 
 // Calculate and display character, words and line counts
 function calcStats() {
@@ -136,7 +140,7 @@ document.querySelector("#print").onclick = function () {
 document.onkeydown = function (event) {
     if (event.ctrlKey) {
         if (event.key === "s") {
-            document.querySelector('#save a').click();
+            document.querySelector('#download a').click();
             event.preventDefault();
         }
         else if (event.key === "o") {
