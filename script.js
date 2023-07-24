@@ -81,10 +81,10 @@ textbox.onkeyup = function () {
     window.clearTimeout(timeoutID); // Prevent saving too frequently
     timeoutID = window.setTimeout(storeLocally, 1000);
 
-    advicebox.innerHTML = getRegexHtml(textbox.value, textbox.selectionStart);
+    advicebox.innerHTML = getRegexHtml(textbox.value);
 };
 
-function getRegexHtml(text, cursorPosition) {
+function getRegexHtml(text) {
     var html = "<ul>";
     const adviceGiven = new Set();
 
@@ -93,16 +93,12 @@ function getRegexHtml(text, cursorPosition) {
         // don't match if at the end of the text (user is still typing)
         // newRegex = '(?:' + expr.regex + ')(?!\\+?\\-?$)'
         // Get all matches 
-        regexp = new RegExp(expr.regex, 'ig')      
-        let match;
-        while ((match = regexp.exec(text)) !== null) {
-
-            const matchEnd = match.index + match[0].length; 
-
-            // don't do anything if the match is where the user is still typing
-            if (matchEnd != cursorPosition) {
+        const matches = text.match(new RegExp(expr.regex, 'ig'));
+      
+        if (matches) {
+            matches.forEach(match => {
                 // Escape match text 
-                const escapedMatch = escapeHtml(match[0] || '');
+                const escapedMatch = escapeHtml(match || '');
                 // Create <li> for each match  
                 advice = `<li>${expr.advice.replaceAll("{match}", escapedMatch)}</li>`;
                 if (!adviceGiven.has(advice)) {
@@ -110,8 +106,9 @@ function getRegexHtml(text, cursorPosition) {
                     // sometimes duplicates are created because of matches includes captured sub-matches
                     adviceGiven.add(advice);
                 }
-            }
-        }  
+              });
+        }
+      
       });
     html += "</ul>"
     return html;
