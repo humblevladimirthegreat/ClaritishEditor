@@ -1,5 +1,5 @@
-const POS_V = "\\+\\w\\b"
-const NEG_V = "\\-\\w\\b"
+const POS_V = "\\+[a-z]\\b"
+const NEG_V = "\\-[a-z]\\b"
 const VALUE = `(?:${POS_V}|${NEG_V})`
 
 const POSITIVE_WORDS = "(?:absorbed|accomplished|amazed|appreciative|awakened|blessed|blissful|blissfully|calm|calmer|captivated|cheerful|cheery|confident|content|contentment|curious|delighted|delightful|eagerness|eager|eagerly|elated|elation|empowered|empowerment|enchantment|encouraged|energized|engaged|engrossing|engrossment|enthralled|enthralling|entertained|enlightened|euphoria|euphoric|excited|exciting|fabulous|fascinated|fascination|festive|festivity|fortunate|fulfilled|fulfilment|glad|glee|gleeful|gleefully|glorious|grateful|gratified|great|happy|happier|happiest|hopeful|incredible|inspired|interested|jubilant|jubilantly|liberated|lovely|loving|lucky|magical|merriment|motivated|optimistic|passion|passionate|passionately|peace|peaceful|perfect|playful|playfulness|pride|proud|proudly|rapt|refreshed|refreshing|rejuvenated|relieved|relieving|renewed|renewal|revitalized|revitalization|satisfaction|satisfied|terrific|thank|thanks|thankful|thrilled|thrilling|triumph|triumphant|victorious|won|wonderful|wondrous)"
@@ -13,7 +13,7 @@ const expressions = [{
         advice: "You must begin your text with <b>Hello+[value]</b>."
     }, {
         // first-person pronoun not followed by value
-        regex: `\\b(?:(?<![-+])I(?!'ll)|I'll|me|my|myself)\\b(?!${VALUE})`,
+        regex: `\\b(?:(?<![-+])I(?!'ll)(?!'m)|I'll|I'm|me|my|myself)\\b(?!${VALUE})`,
         advice: "Add value to <b>{match}</b>."
     }, {
         // negative value not followed by silver lining
@@ -90,6 +90,8 @@ function getRegexHtml(text) {
 
     expressions.forEach(expr => {
 
+        // don't match if at the end of the text (user is still typing)
+        // newRegex = '(?:' + expr.regex + ')(?!\\+?\\-?$)'
         // Get all matches 
         const matches = text.match(new RegExp(expr.regex, 'ig'));
       
