@@ -81,10 +81,10 @@ textbox.onkeyup = function () {
     window.clearTimeout(timeoutID); // Prevent saving too frequently
     timeoutID = window.setTimeout(storeLocally, 1000);
 
-    advicebox.innerHTML = getRegexHtml(textbox.value);
+    advicebox.innerHTML = getRegexHtml(textbox.value, textbox.selectionStart);
 };
 
-function getRegexHtml(text) {
+function getRegexHtml(text, cursorPosition) {
     var html = "<ul>";
     const adviceGiven = new Set();
 
@@ -93,12 +93,16 @@ function getRegexHtml(text) {
         // don't match if at the end of the text (user is still typing)
         // newRegex = '(?:' + expr.regex + ')(?!\\+?\\-?$)'
         // Get all matches 
-        const matches = text.match(new RegExp(expr.regex, 'ig'));
-      
-        if (matches) {
-            matches.forEach(match => {
+        regexp = new RegExp(expr.regex, 'ig')      
+        let match;
+        while ((match = regexp.exec(text)) !== null) {
+
+            const matchEnd = match.index + match[0].length; 
+
+            // don't do anything if the match is where the user is still typing
+            if (matchEnd != cursorPosition) {
                 // Escape match text 
-                const escapedMatch = escapeHtml(match || '');
+                const escapedMatch = escapeHtml(match[0] || '');
                 // Create <li> for each match  
                 advice = `<li>${expr.advice.replaceAll("{match}", escapedMatch)}</li>`;
                 if (!adviceGiven.has(advice)) {
@@ -106,9 +110,8 @@ function getRegexHtml(text) {
                     // sometimes duplicates are created because of matches includes captured sub-matches
                     adviceGiven.add(advice);
                 }
-              });
-        }
-      
+            }
+        }  
       });
     html += "</ul>"
     return html;
