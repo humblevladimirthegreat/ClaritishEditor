@@ -169,11 +169,6 @@ document.querySelector('#open input').onchange = function () {
     reader.readAsText(this.files[0]); // this = input element
 };
 
-// Print the content
-document.querySelector("#print").onclick = function () {
-    window.print();
-};
-
 // Keyboard shortcuts for the save and load functions (`Ctrl+S`, `Ctrl+O`)
 document.onkeydown = function (event) {
     if (event.ctrlKey) {
