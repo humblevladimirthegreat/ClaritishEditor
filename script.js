@@ -81,7 +81,7 @@ const pointFunctions = [
         return sum;
     },
     regexScorer(VALUE, 3),
-    regexScorer("ior|eor", 10),
+    regexScorer(/\bior\b|\beor\b/, 10),
 ];
 
 var textbox = document.querySelector('#textbox');
