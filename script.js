@@ -50,6 +50,19 @@ const advices = [{
     }, 
   ];
 
+// returns a function that awards points per regex match
+function regexScorer(regex, pointsPerMatch) {
+    return (text) => {
+        const matches = text.match(new RegExp(regex, 'ig'));
+
+        if (!matches) {
+          return 0;
+        }
+      
+        return matches.length * pointsPerMatch;
+    };
+}
+
 const pointFunctions = [
     function bodyscan(text) {
         const regex = /~([a-z]{2}\d+)+/gi;
@@ -66,7 +79,9 @@ const pointFunctions = [
           }
         }
         return sum;
-    }
+    },
+    regexScorer(VALUE, 3),
+    regexScorer("ior|eor", 10),
 ];
 
 var textbox = document.querySelector('#textbox');
