@@ -6,11 +6,11 @@ const POSITIVE_WORDS = "(?:absorbed|accomplished|amazed|appreciative|awakened|bl
 //TODO: add profanity?
 const NEGATIVE_WORDS = "(?:afflicted|agony|agonized|agonizing|angry|angered|angrier|angriest|anguish|anguished|annoyed|annoying|anxious|appalled|appalling|ashamed|bothered|confused|crushed|depressed|depressing|depression|despairing|despondent|destroyed|devastated|disappointed|disappointment|disgusted|disgusting|distraught|distress|distressed|disturbing|embarrassed|embarrassing|enraged|exhausted|forlorn|frustrated|fuming|grief|grieving|guilt|guilty|hate|hated|hatred|heartbroken|heartsick|horrified|horrifying|hurt|hurting|hysterical|inconsolable|indignant|infuriated|insecure|irate|irritated|jealous|lonely|livid|mad|miserable|mourn|mourned|mourning|nauseated|nauseous|offended|outraged|overwhelmed|panicked|panicky|paranoid|petrified|pissed|pained|provoked|regert|regretful|regretting|repulsed|resent|resentful|revolted|revolting|sad|sadder|saddest|scared|seething|shame|shamed|shattered|shocked|sickened|sickening|sorrow|stress|stressed|stunned|suicidal|terrified|terrifying|torment|tormented|troubled|troubling|unhappy|upset|upsetting|worried|wretched)"
 
-// List of regex checks 
-const expressions = [{    
+// List of regex checks for advice 
+const advices = [{    
         // hello with value
         regex: `^(?!hello${VALUE})`,
-        advice: "You must begin your text with <b>Hello+[value]</b>."
+        advice: "Begin your text with <b>Hello+[value]</b>."
     }, {
         // first-person pronoun not followed by value
         regex: `\\b(?:(?<![-+])I(?!'ll)(?!'m)|I'll|I'm|me|my|myself)\\b(?!${VALUE})`,
@@ -49,7 +49,26 @@ const expressions = [{
         // advice: "Replace <b>{match}</b> with a mood word."
     }, 
   ];
-  
+
+const pointFunctions = [
+    function bodyscan(text) {
+        const regex = /~([a-z]{2}\d+)+/gi;
+        let sum = 0;
+        
+        let match;
+        while ((match = regex.exec(text)) !== null) {
+          // Extract just the numeric part from the match
+          const nums = match[0].match(/\d+/g);
+          
+          // Sum the numbers
+          for (let num of nums) {
+            sum += parseInt(num);
+          }
+        }
+        return sum;
+    }
+];
+
 var textbox = document.querySelector('#textbox');
 var timeoutID = null;
 var filenameBox = document.querySelector('#filename');
@@ -57,7 +76,7 @@ var filenameBox = document.querySelector('#filename');
 // Automatically load/save cache in local storage when opening and closing the page
 textbox.value = localStorage.getItem('browserpad') || '';
 textbox.setSelectionRange(textbox.value.length, textbox.value.length); // Place caret at end of content
-calcStats(); // Update counters after loading
+calcScore(); // Update counters after loading
 function storeLocally() { localStorage.setItem('browserpad', textbox.value); }
 window.beforeunload = storeLocally;
 
@@ -75,9 +94,9 @@ textbox.onkeypress = function (event) {
     }
 };
 
-// Auto-save to local storage and calculate stats on every keystroke
+// Auto-save to local storage and calculate score on every keystroke
 textbox.onkeyup = function () {
-    calcStats();
+    calcScore();
     window.clearTimeout(timeoutID); // Prevent saving too frequently
     timeoutID = window.setTimeout(storeLocally, 1000);
 
@@ -88,12 +107,12 @@ function getRegexHtml(text) {
     var html = "<ul>";
     const adviceGiven = new Set();
 
-    expressions.forEach(expr => {
+    advices.forEach(expr => {
 
-        // don't match if at the end of the text (user is still typing)
-        // newRegex = '(?:' + expr.regex + ')(?!\\+?\\-?$)'
+        // don't match unless there's whitespace after it (otherwise user is still typing)
+        newRegex = '(?:' + expr.regex + ')(?=[ .,])'
         // Get all matches 
-        const matches = text.match(new RegExp(expr.regex, 'ig'));
+        const matches = text.match(new RegExp(newRegex, 'ig'));
       
         if (matches) {
             matches.forEach(match => {
@@ -123,14 +142,11 @@ function escapeHtml(unsafeText) {
       .replace(/'/g, "&#039;");
 };
 
-// Calculate and display character, words and line counts
-function calcStats() {
-    updateCount('char', textbox.value.length);
-    updateCount('word', textbox.value === "" ? 0 : textbox.value.replace(/\s+/g, ' ').split(' ').length);
-    updateCount('line', textbox.value === "" ? 0 : textbox.value.split(/\n/).length);
-}
-function updateCount(item, value) {
-    document.querySelector('#' + item + '-count').textContent = value;
+function calcScore() {
+    let text = textbox.value;
+    var score = 0;
+    pointFunctions.forEach(func => score += func(text))
+    document.querySelector('#score').textContent = score;
 }
 
 // Save textarea contents as a text file
