@@ -116,33 +116,45 @@ textbox.onkeyup = function () {
     timeoutID = window.setTimeout(storeLocally, 1000);
 };
 
-function getRegexHtml(text) {
-    var html = "<ul>";
-    const adviceGiven = new Set();
-
+function getAdviceMatches(text) {
+    var adviceMatches = [];
     advices.forEach(expr => {
-
-        // don't match unless there's whitespace after it (otherwise user is still typing)
-        newRegex = '(?:' + expr.regex + ')(?=[ .,])'
-        // Get all matches 
-        const matches = text.match(new RegExp(newRegex, 'ig'));
-      
-        if (matches) {
-            matches.forEach(match => {
-                // Escape match text 
-                const escapedMatch = escapeHtml(match || '');
-                // Create <li> for each match  
-                advice = `<li>${expr.advice.replaceAll("{match}", escapedMatch)}</li>`;
-                if (!adviceGiven.has(advice)) {
-                    html += advice;
-                    // sometimes duplicates are created because of matches includes captured sub-matches
-                    adviceGiven.add(advice);
-                }
-            });
+        for (const match of text.matchAll(new RegExp(expr.regex, 'ig'))) {
+            let matchedText = escapeHtml(match[0] || '');
+            advice = expr.advice.replaceAll("{match}", matchedText);
+            adviceMatches.push([match.index, matchedText, advice]);
         }
-      
-      });
-    html += "</ul>"
+    });
+    adviceMatches.sort();
+    return adviceMatches;
+}
+
+function removeAdviceReferences(text) {
+    return text.replace(/\[\d+\]/g, '');
+}
+
+function addAdviceReferences(text, adviceMatches) {
+    //do it in reverse order so the match indexes remain valid
+    for (let i = adviceMatches.length - 1; i >= 0; i--) {
+        // the position of the end of the matched text
+        index = adviceMatches[i][0] + adviceMatches[i][1].length;
+        // insert the reference at end of matched text. Use 1-indexing for correspondence with ordered list
+        text = text.substring(0, index) + `[${i+1}]` + text.substring(index);
+    }
+    return text;
+}
+
+function getAdviceHtml(adviceMatches) {
+    var html = "<ol>";
+    
+    if (adviceMatches) {
+        adviceMatches.forEach(adviceMatch => {
+            // Create <li> for each match  
+            html += `<li>${adviceMatch[2]}</li>`;
+        });
+    }
+    
+    html += "</ol>"
     return html;
 };
 
@@ -157,7 +169,10 @@ function escapeHtml(unsafeText) {
 
 // Show the hints
 document.querySelector("#hints-button").onclick = function () {
-    advicebox.innerHTML = getRegexHtml(textbox.value);
+    text = removeAdviceReferences(textbox.value);
+    const matches = getAdviceMatches(text);
+    advicebox.innerHTML = getAdviceHtml(matches);
+    textbox.value = addAdviceReferences(text, matches);
 };
 
 function calcScore() {
