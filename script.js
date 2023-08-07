@@ -13,7 +13,7 @@ const advices = [{
         advice: "Begin your text with <b>Hello+[value]</b>."
     }, {
         // first-person pronoun not followed by value
-        regex: `\\b(?:(?<![-+])I(?!'ll)(?!'m)|I'll|I'm|me|my|myself)\\b(?!${VALUE})`,
+        regex: `\\b((?<![-+])I(?!'ll)(?!'m)|I'll|I'm|me|my|myself)\\b(?!${VALUE})`,
         advice: "Add value to <b>{match}</b>."
     }, {
         // negative value not followed by silver lining
@@ -120,12 +120,15 @@ function getAdviceMatches(text) {
     var adviceMatches = [];
     advices.forEach(expr => {
         for (const match of text.matchAll(new RegExp(expr.regex, 'ig'))) {
-            let matchedText = escapeHtml(match[0] || '');
-            advice = expr.advice.replaceAll("{match}", matchedText);
+            let matchedText = match[0];
+            advice = expr.advice.replaceAll("{match}", escapeHtml(matchedText || ''));
             adviceMatches.push([match.index, matchedText, advice]);
         }
     });
-    adviceMatches.sort();
+    // sort by index, because JS default approach to sort is apparently to coerce the arrays to string first
+    adviceMatches.sort((a, b) => {
+        return a[0] - b[0];
+    });
     return adviceMatches;
 }
 
@@ -145,16 +148,16 @@ function addAdviceReferences(text, adviceMatches) {
 }
 
 function getAdviceHtml(adviceMatches) {
-    var html = "<ol>";
-    
-    if (adviceMatches) {
+    var html = "<ol>"
+    if (adviceMatches.length > 0) {
         adviceMatches.forEach(adviceMatch => {
             // Create <li> for each match  
             html += `<li>${adviceMatch[2]}</li>`;
         });
+        html += "</ol>"
+    } else {
+        html = "You used all the possible Claritish options!"
     }
-    
-    html += "</ol>"
     return html;
 };
 
