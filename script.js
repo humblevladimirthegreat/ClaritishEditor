@@ -13,7 +13,7 @@ const advices = [{
         advice: "Begin your text with <b>Hello+[value]</b>."
     }, {
         // first-person pronoun not followed by value
-        regex: `\\b((?<![-+])I(?!'ll)(?!'m)|I'll|I'm|me|my|myself)\\b(?!${VALUE})`,
+        regex: `\\b((?<![-+])I(?!'ll)(?!'m)(?!'ve)|I'll|I'm|I've|me|my|myself)\\b(?!${VALUE})`,
         advice: "Add value to <b>{match}</b>."
     }, {
         // negative value not followed by silver lining
@@ -21,7 +21,7 @@ const advices = [{
         advice: "Add silver-lining value to <b>{match}</b>."
     }, {
         // 3rd-person pronoun not followed by value
-        regex: `\\b(?:he|him|his|he's|himself|she|her|she's|herself)\\b(?![?"]${VALUE})`,
+        regex: `\\b(?:he(?!'ll)(?!'s)|him|his|he's|he'll|himself|she(?!'ll)(?!'s)|her|she's|she'll|herself)\\b(?![?"]${VALUE})`,
         advice: "Add a \" or ? value to <b>{match}</b> to foster empathy."
     }, {
         // positive word not followed by @
@@ -95,8 +95,21 @@ calcScore(); // Update counters after loading
 function storeLocally() { localStorage.setItem('browserpad', textbox.value); }
 window.beforeunload = storeLocally;
 
-// Set the filename placeholder to have the date as YYYY_MM_DD
+//keep track of how many distinct days the page has been opened
+if(localStorage.getItem('daysVisited') === null) {
+    localStorage.setItem('daysVisited', ''); 
+  }
 const dateString = new Date().toISOString().slice(0,10);
+// daysVisited is stored as comma-separated list of YYYY_MM_DD 
+let daysVisited = localStorage.getItem('daysVisited').split(','); 
+  
+if(!daysVisited.includes(dateString)) {
+    daysVisited.push(dateString); 
+    localStorage.setItem('daysVisited', daysVisited.join(','));
+}
+document.querySelector('#days').textContent = daysVisited.length;
+
+// Set the filename placeholder to have the date
 filenameBox.placeholder = "claritish_" + dateString + ".txt";
 
 // Allow inputting tabs in the textarea instead of changing focus to the next element
