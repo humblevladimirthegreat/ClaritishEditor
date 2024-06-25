@@ -10,15 +10,15 @@ const NEGATIVE_WORDS = "(?:afflicted|agony|agonized|agonizing|angry|angered|angr
 const advices = [{    
         // hello with value
         regex: `^(?!hello${VALUE})`,
-        advice: "Begin your text with <b>Hello+[value]</b>."
+        advice: "Begin your text with <b>Hello+[value]</b> to solidify why you are writing."
     }, {
         // first-person pronoun not followed by value
         regex: `\\b((?<![-+])I(?!'ll)(?!'m)(?!'ve)|I'll|I'm|I've|me|my|myself)\\b(?!${VALUE})`,
-        advice: "Add value to <b>{match}</b>."
+        advice: "Add value to <b>{match}</b> to consider how it helps you."
     }, {
         // negative value not followed by silver lining
         regex: `${NEG_V}(?!${POS_V})`, 
-        advice: "Add silver-lining value to <b>{match}</b>."
+        advice: "Add silver-lining value to <b>{match}</b> to remember it's not all bad."
     }, {
         // 3rd-person pronoun not followed by value
         regex: `\\b(?:he(?!'ll)(?!'s)|him|his|he's|he'll|himself|she(?!'ll)(?!'s)|her|she's|she'll|herself)\\b(?![?"]${VALUE})`,
@@ -38,12 +38,24 @@ const advices = [{
     }, {    
         // 'or' -> eor, ior
         regex: /\bor\b/,
-        advice: "Replace <b>{match}</b> with <b>eor</b> or <b>ior</b>."
+        advice: "Replace <b>{match}</b> with <b>eor</b> or <b>ior</b> to consider other options."
+    }, {    
+        // checks for general statements
+        regex: /\b(should|always|never)\b/i,
+        advice: "Replace <b>{match}</b> with 'x implies that y entails z'."
     }, {    
         // checks for future tense
         regex: /\b(will|\w+'ll|shall|going)\b/i,
-        advice: "Replace <b>{match}</b> with plan0, plan1, or plan2."
+        advice: "Replace <b>{match}</b> with plan[0-3] or predict[0-5]."
     }, {    
+        // checks for habitual cases
+        regex: /\b(sometimes|again|frequently|often|repeatedly|periodically|intermittently|sporadically)\b/i,
+        advice: "Replace <b>{match}</b> with occasionally/regularly/conditionally."
+    }, {    
+        // checks for to be
+        regex: /\b(be|being|been|am|is|are|was|were|isn't|aren't|wasn't|weren't|ain't|I'm|we're|you're|he's|she's|it's|they're|there's|here's|where's|when's|why's|how's|who's|what's|that's)\b/i,
+        advice: "Replace <b>{match}</b> with verbs."
+    // }, {    
     //     // checks for past/future tense
     //     regex: /\b(will|\w+'ll|shall|had|did|was|were|used)\b/i,
     //     advice: "Replace <b>{match}</b> with a tense word."
