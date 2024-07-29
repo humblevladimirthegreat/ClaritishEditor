@@ -1,8 +1,8 @@
-const POS_V = "\\+[a-z]\\b"
-const NEG_V = "\\-[a-z]\\b"
+const POS_V = "\\+[a-z]"
+const NEG_V = "\\-[a-z]"
 const VALUE = `(?:${POS_V}|${NEG_V})`
 
-const POSITIVE_WORDS = "(?:absorbed|accomplished|amazed|appreciative|awakened|blessed|blissful|blissfully|calm|calmer|captivated|cheerful|cheery|confident|content|contentment|curious|delighted|delightful|eagerness|eager|eagerly|elated|elation|empowered|empowerment|enchantment|encouraged|energized|engaged|engrossing|engrossment|enthralled|enthralling|entertained|enlightened|euphoria|euphoric|excited|exciting|fabulous|fascinated|fascination|festive|festivity|fortunate|fulfilled|fulfilment|glad|glee|gleeful|gleefully|glorious|grateful|gratified|great|happy|happier|happiest|hopeful|incredible|inspired|interested|jubilant|jubilantly|liberated|lovely|loving|lucky|magical|merriment|motivated|optimistic|passion|passionate|passionately|peace|peaceful|perfect|playful|playfulness|pride|proud|proudly|rapt|refreshed|refreshing|rejuvenated|relieved|relieving|renewed|renewal|revitalized|revitalization|satisfaction|satisfied|terrific|thank|thanks|thankful|thrilled|thrilling|triumph|triumphant|victorious|won|wonderful|wondrous)"
+const POSITIVE_WORDS = "(?:absorbed|accomplished|amazed|appreciative|awakened|blessed|blissful|blissfully|calm|calmer|captivated|cheerful|cheery|confident|content|contentment|curious|delighted|delightful|eagerness|eager|eagerly|elated|elation|empowered|empowerment|enchantment|encouraged|energized|engaged|engrossing|engrossment|enthralled|enthralling|entertained|enlightened|euphoria|euphoric|excited|exciting|fabulous|fascinated|fascination|festive|festivity|fortunate|fulfilled|fulfilment|glad|glee|gleeful|gleefully|glorious|grateful|gratified|great|happy|happier|happiest|hopeful|incredible|inspired|interested|jubilant|jubilantly|liberated|lovely|loving|lucky|magical|merriment|motivated|optimistic|passion|passionate|passionately|peace|peaceful|perfect|playful|playfulness|pride|proud|proudly|rapt|refreshed|refreshing|rejuvenated|relieved|relieving|renewed|renewal|revitalized|revitalization|satisfaction|satisfied|terrific|thank|thanks|thankful|thankfully|thrilled|thrilling|triumph|triumphant|victorious|won|wonderful|wondrous)"
 //TODO: add profanity?
 const NEGATIVE_WORDS = "(?:afflicted|agony|agonized|agonizing|angry|angered|angrier|angriest|anguish|anguished|annoyed|annoying|anxious|appalled|appalling|ashamed|bothered|confused|crushed|depressed|depressing|depression|despairing|despondent|destroyed|devastated|disappointed|disappointment|disgusted|disgusting|distraught|distress|distressed|disturbing|embarrassed|embarrassing|enraged|exhausted|fear|forlorn|frustrated|fuming|grief|grieving|guilt|guilty|hate|hated|hatred|heartbroken|heartsick|horrified|horrifying|hurt|hurting|hysterical|inconsolable|indignant|infuriated|insecure|irate|irritated|jealous|lonely|livid|mad|miserable|mourn|mourned|mourning|nauseated|nauseous|offended|outraged|overwhelmed|panicked|panicky|paranoid|petrified|pissed|pained|provoked|regert|regretful|regretting|repulsed|resent|resentful|revolted|revolting|sad|sadder|saddest|scared|seething|shame|shamed|shattered|shocked|sickened|sickening|sorrow|stress|stressed|stunned|suicidal|sucks|terrified|terrifying|torment|tormented|troubled|troubling|unhappy|upset|upsetting|worried|wretched)"
 
@@ -42,11 +42,11 @@ const advices = [{
     }, {    
         // checks for general statements
         regex: /\b(should|always|never)\b/i,
-        advice: "Replace <b>{match}</b> with 'x implies that y entails z'."
+        advice: "Replace <b>{match}</b> with \"x implies that...\"."
     }, {    
         // checks for future tense
-        regex: /\b(will|\w+'ll|shall|going)\b/i,
-        advice: "Replace <b>{match}</b> with plan[0-3] or predict[0-5]."
+        regex: /\b(will|\w+'ll|shall|going to)\b/i,
+        advice: "Replace <b>{match}</b> with plan_[None,Vague,Detail,Contingency] or predict[Never,Sometimes,Mostly,Always,Unknown]."
     }, {    
         // checks for habitual cases
         regex: /\b(sometimes|again|frequently|often|repeatedly|periodically|intermittently|sporadically)\b/i,
@@ -54,7 +54,15 @@ const advices = [{
     }, {    
         // checks for to be
         regex: /\b(be|being|been|am|is|are|was|were|isn't|aren't|wasn't|weren't|ain't|I'm|we're|you're|he's|she's|it's|they're|there's|here's|where's|when's|why's|how's|who's|what's|that's)\b/i,
-        advice: "Replace <b>{match}</b> with verbs."
+        advice: "Replace <b>{match}</b> with verbs to avoid to-be."
+    }, {    
+        // checks for negative judgments
+        regex: /\b(bad|terrible|awful|horrible|poor|subpar|inferior|inadequate|disappointing|unsatisfactory|mediocre|unacceptable|appalling|dreadful|atrocious|abysmal|lousy|shoddy|deficient|flawed)\b/i,
+        advice: "Replace <b>{match}</b> with \"worse than [Average,Typical,Mine,Social,Professional,Everyone]\""
+    }, {    
+        // checks for need/have to
+        regex: /\b(need to|have to)\b/i,
+        advice: "Remove <b>{match}</b> and consider why you're really doing it."
     // }, {    
     //     // checks for past/future tense
     //     regex: /\b(will|\w+'ll|shall|had|did|was|were|used)\b/i,
