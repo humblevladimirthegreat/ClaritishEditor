@@ -1,6 +1,6 @@
-const POS_V = "\\+[a-z]"
-const NEG_V = "\\-[a-z]"
-const VALUE = `(?:${POS_V}|${NEG_V})`
+const POS_D = "\\+[a-z]"
+const NEG_D = "\\-[a-z]"
+const DRIVE = `(?:${POS_D}|${NEG_D})`
 
 const POSITIVE_WORDS = "(?:absorbed|accomplished|amazed|appreciative|awakened|blessed|blissful|blissfully|calm|calmer|captivated|cheerful|cheery|confident|content|contentment|curious|delighted|delightful|eagerness|eager|eagerly|elated|elation|empowered|empowerment|enchantment|encouraged|energized|engaged|engrossing|engrossment|enthralled|enthralling|entertained|enlightened|euphoria|euphoric|excited|exciting|fabulous|fascinated|fascination|festive|festivity|fortunate|fulfilled|fulfilment|glad|glee|gleeful|gleefully|glorious|grateful|gratified|great|happy|happier|happiest|hopeful|incredible|inspired|interested|jubilant|jubilantly|liberated|lovely|loving|lucky|magical|merriment|motivated|optimistic|passion|passionate|passionately|peace|peaceful|perfect|playful|playfulness|pride|proud|proudly|rapt|refreshed|refreshing|rejuvenated|relieved|relieving|renewed|renewal|revitalized|revitalization|satisfaction|satisfied|terrific|thank|thanks|thankful|thankfully|thrilled|thrilling|triumph|triumphant|victorious|won|wonderful|wondrous)"
 //TODO: add profanity?
@@ -8,21 +8,21 @@ const NEGATIVE_WORDS = "(?:afflicted|agony|agonized|agonizing|angry|angered|angr
 
 // List of regex checks for advice 
 const advices = [{    
-        // hello with value
-        regex: `^(?!hello${VALUE})`,
-        advice: "Begin your text with <b>Hello+[value]</b> to solidify why you are writing."
+        // hello with drive
+        regex: `^(?!hello${DRIVE})`,
+        advice: "Begin your text with <b>Hello+[drive]</b> to solidify why you are writing."
     }, {
-        // first-person pronoun not followed by value
-        regex: `\\b((?<![-+])I(?!'ll)(?!'m)(?!'ve)|I'll|I'm|I've|me|my|myself)\\b(?!${VALUE})`,
-        advice: "Add value to <b>{match}</b> to consider how it helps you."
+        // first-person pronoun not followed by drive
+        regex: `\\b((?<![-+])I(?!'ll)(?!'m)(?!'ve)|I'll|I'm|I've|me|my|myself)\\b(?!${DRIVE})`,
+        advice: "Append <b>{match}</b> with [Safety, Contentment, Excitement, Unknown] to consider how it helps you."
     }, {
-        // negative value not followed by silver lining
-        regex: `${NEG_V}(?!${POS_V})`, 
-        advice: "Add silver-lining value to <b>{match}</b> to remember it's not all bad."
+        // negative drive not followed by silver lining
+        regex: `${NEG_D}(?!${POS_D})`, 
+        advice: "Add silver-lining drive to <b>{match}</b> to remember it's not all bad."
     }, {
-        // 3rd-person pronoun not followed by value
-        regex: `\\b(?:he(?!'ll)(?!'s)|him|his|he's|he'll|himself|she(?!'ll)(?!'s)|her|she's|she'll|herself)\\b(?![?"]${VALUE})`,
-        advice: "Add a \" or ? value to <b>{match}</b> to foster empathy."
+        // 3rd-person pronoun not followed by drive
+        regex: `\\b(?:he(?!'ll)(?!'s)|him|his|he's|he'll|himself|she(?!'ll)(?!'s)|her|she's|she'll|herself)\\b(?![?"]${DRIVE})`,
+        advice: "Add a \" or ? drive to <b>{match}</b> to foster empathy."
     }, {
         // positive word not followed by @
         regex: `\\b${POSITIVE_WORDS}\\b(?!@)`,
@@ -32,9 +32,9 @@ const advices = [{
         regex: `\\b${NEGATIVE_WORDS}\\b(?!@)`,
         advice: "Append <b>{match}</b> with the breath-marker <b>@</b> to ground yourself."
     }, {
-        // negative word and @ not followed by value
-        regex: `\\b${NEGATIVE_WORDS}\\b@(?!${VALUE})`,
-        advice: "Append <b>{match}</b> with a silver-lining value to foster compassion."
+        // negative word and @ not followed by drive
+        regex: `\\b${NEGATIVE_WORDS}\\b@(?!${DRIVE})`,
+        advice: "Append <b>{match}</b> with a silver-lining drive to foster compassion."
     }, {    
         // 'or' -> eor, ior
         regex: /\bor\b/,
@@ -104,7 +104,7 @@ const pointFunctions = [
         }
         return sum;
     },
-    regexScorer(VALUE, 3),
+    regexScorer(DRIVE, 3),
     regexScorer(/\bior\b|\beor\b/, 10),
 ];
 

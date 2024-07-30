@@ -9,50 +9,8 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <textarea id="linewidth-guide" />
   <textarea id="textbox" autofocus="autofocus" placeholder="type here" spellcheck="false"></textarea>
-  <div id="valuehelp">
-    <b>P</b>hysical:
-    <ul>
-      <li><b>N</b>ourishment</li>
-      <li>safet<b>Y</b></li>
-      <li><b>V</b>itality</li>
-    </ul>
-
-    <b>E</b>motional:
-    <ul>
-      <li><b>D</b>elight</li>
-      <li><b>B</b>elonging</li>
-      <li><b>F</b>reedom</li>
-      <li><b>R</b>ecognition</li>
-      <li><b>C</b>alm</li>  
-    </ul>
-
-    <b>I</b>ntellectual:
-    <ul>
-      <li><b>M</b>eaning</li>
-      <li><b>G</b>rowth</li>
-      <li><b>U</b>nderstanding</li>
-      <li><b>Q</b>ualification</li>  
-    </ul>
-
-    <b>S</b>piritual:
-    <ul>
-      <li><b>A</b>we</li>
-      <li><b>T</b>rust</li>
-      <li><b>O</b>neness</li>
-      <li><b>H</b>onor</li>  
-    </ul>
-
-    <b>W</b>ithout:
-    <ul>
-      <li><b>J</b>umbled</li> 
-      <li>un<b>K</b>nown</li>
-      <li>accidenta<b>L</b></li>
-      <li>e<b>X</b>pectation</li>
-      <li><b>Z</b>ombie-like</li>      
-    </ul>
-  </div>
+  <div id="hints-button-div"><a href="#" title="Show Hints" id="hints-button">Analyze</a></div>
   <div id="advicebox">Output of the Claritish checker goes here.</div>
   <nav>
     <span id="stats">
@@ -61,14 +19,14 @@
       score: <span id="score">_</span>
     </span>
     <span id="controls">
-      <a href="#" title="Show Hints" id="hints-button">hints</a>
       <span id="open">
         <input type="file" value="open" />
         <a href="#">open</a>
       </span>
+      |
       <span id="download">
-        <input id="filename" />
         <a href="#">download</a>
+        <input id="filename" />
       </span> │
       <a href="#" title="About Claritish" id="about-icon">ⓘ</a>
     </span>

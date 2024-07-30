@@ -8,34 +8,37 @@ textarea {
 }
 #textbox {
   background-color: transparent;
-  width: calc(80ch + 1px);
-  height: calc(50% - 1rem); 
+  width: calc(100% - 2rem);
+  height: calc(30% - 1rem); 
+  font-size: 1.5vh;
   padding: 0.5em;
   overflow-y: scroll;
-}
-#linewidth-guide {
-  border-right: 1px solid PaleTurquoise;
-  width: calc(80ch + 1px);
-  height: calc(50%); 
-  margin-left: 0.5em;
-  position: absolute;
-  z-index: -1;
-}
-#valuehelp {
-  background-color: transparent;
-  position: absolute; 
-  top: 0;
-  left: 58ch;
-  /* border: 1px solid black;  */
 }
 #advicebox {
   background-color: transparent;
   width: 100%;
   border-top: 5px solid black; 
   overflow-y: scroll;
-  height: calc(50% - 1rem);
+  height: calc(65% - 1rem);
   position: absolute;
-  top: calc(50% + 1rem);
+  top: calc(35% + 1rem);
+  font-size: 1.5vh;
+}
+#hints-button-div{
+  top: calc(30% + 1rem);
+  position: absolute;
+  font-size: 3vh;
+  padding: 5px;
+  background-color: #4CAF50;
+  border: none;
+  color: white;
+  border-radius: 4px;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+#hints-button-div:hover {
+  background-color: #45a049;
 }
 nav {
   position: fixed; bottom: 0; left: 0;
@@ -46,7 +49,7 @@ nav {
 #controls {
   float: right;
 }
-#download a {
+a {
   text-decoration: none;
 }
 #open > input {
