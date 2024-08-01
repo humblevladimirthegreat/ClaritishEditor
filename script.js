@@ -1,6 +1,6 @@
-const POS_D = "\\+[a-z]"
-const NEG_D = "\\-[a-z]"
-const DRIVE = `(?:${POS_D}|${NEG_D})`
+const POS_D = "\\+[a-z]\\b"
+const NEG_D = "\\-[a-z]\\b"
+const NEED = `(?:${POS_D}|${NEG_D})`
 
 const POSITIVE_WORDS = "(?:absorbed|accomplished|amazed|appreciative|awakened|blessed|blissful|blissfully|calm|calmer|captivated|cheerful|cheery|confident|content|contentment|curious|delighted|delightful|eagerness|eager|eagerly|elated|elation|empowered|empowerment|enchantment|encouraged|energized|engaged|engrossing|engrossment|enthralled|enthralling|entertained|enlightened|euphoria|euphoric|excited|exciting|fabulous|fascinated|fascination|festive|festivity|fortunate|fulfilled|fulfilment|glad|glee|gleeful|gleefully|glorious|grateful|gratified|great|happy|happier|happiest|hopeful|incredible|inspired|interested|jubilant|jubilantly|liberated|lovely|loving|lucky|magical|merriment|motivated|optimistic|passion|passionate|passionately|peace|peaceful|perfect|playful|playfulness|pride|proud|proudly|rapt|refreshed|refreshing|rejuvenated|relieved|relieving|renewed|renewal|revitalized|revitalization|satisfaction|satisfied|terrific|thank|thanks|thankful|thankfully|thrilled|thrilling|triumph|triumphant|victorious|won|wonderful|wondrous)"
 //TODO: add profanity?
@@ -8,21 +8,21 @@ const NEGATIVE_WORDS = "(?:afflicted|agony|agonized|agonizing|angry|angered|angr
 
 // List of regex checks for advice 
 const advices = [{    
-        // hello with drive
-        regex: `^(?!hello${DRIVE})`,
-        advice: "Begin your text with <b>Hello+[drive]</b> to solidify why you are writing."
+        // hello with need
+        regex: `^(?!hello${NEED})`,
+        advice: "Begin your text with <b>Hello+[need]</b> to solidify why you are writing."
     }, {
-        // first-person pronoun not followed by drive
-        regex: `\\b((?<![-+])I(?!'ll)(?!'m)(?!'ve)|I'll|I'm|I've|me|my|myself)\\b(?!${DRIVE})`,
-        advice: "Append <b>{match}</b> with [Safety, Contentment, Excitement, Unknown] to consider how it helps you."
+        // first-person pronoun not followed by need
+        regex: `\\b((?<![-+])I(?!'ll)(?!'m)(?!'ve)|I'll|I'm|I've|me|my|myself)\\b(?!${NEED})`,
+        advice: "Append <b>{match}</b> with [Love,Belonging,Competency,Autonomy,Meaning,Honesty,Peace,Excitement,Survival] to consider how it helps you."
     }, {
-        // negative drive not followed by silver lining
+        // negative need not followed by perspective
         regex: `${NEG_D}(?!${POS_D})`, 
-        advice: "Add silver-lining drive to <b>{match}</b> to remember it's not all bad."
+        advice: "Append <b>{match}</b> with need to consider long-term perspective."
     }, {
-        // 3rd-person pronoun not followed by drive
-        regex: `\\b(?:he(?!'ll)(?!'s)|him|his|he's|he'll|himself|she(?!'ll)(?!'s)|her|she's|she'll|herself)\\b(?![?"]${DRIVE})`,
-        advice: "Add a \" or ? drive to <b>{match}</b> to foster empathy."
+        // 3rd-person pronoun not followed by need
+        regex: `\\b(?:he(?!'ll)(?!'s)|him|his|he's|he'll|himself|she(?!'ll)(?!'s)|her|she's|she'll|herself)\\b(?![?"]${NEED})`,
+        advice: "Add a \" or ? need to <b>{match}</b> to foster empathy."
     }, {
         // positive word not followed by @
         regex: `\\b${POSITIVE_WORDS}\\b(?!@)`,
@@ -32,9 +32,9 @@ const advices = [{
         regex: `\\b${NEGATIVE_WORDS}\\b(?!@)`,
         advice: "Append <b>{match}</b> with the breath-marker <b>@</b> to ground yourself."
     }, {
-        // negative word and @ not followed by drive
-        regex: `\\b${NEGATIVE_WORDS}\\b@(?!${DRIVE})`,
-        advice: "Append <b>{match}</b> with a silver-lining drive to foster compassion."
+        // negative word and @ not followed by need
+        regex: `\\b${NEGATIVE_WORDS}\\b@(?!${NEED})`,
+        advice: "Append <b>{match}</b> with need to consider long-term perspective."
     }, {    
         // 'or' -> eor, ior
         regex: /\bor\b/,
@@ -53,9 +53,9 @@ const advices = [{
         advice: "Replace <b>{match}</b> with occasionally/regularly/conditionally."
     }, {    
         // checks for to be
-        regex: /\b(be|being|been|am|is|are|was|were|isn't|aren't|wasn't|weren't|ain't|I'm|we're|you're|he's|she's|it's|they're|there's|here's|where's|when's|why's|how's|who's|what's|that's)\b/i,
-        advice: "Replace <b>{match}</b> with verbs to avoid to-be."
-    }, {    
+    //     regex: /\b(be|being|been|am|is|are|was|were|isn't|aren't|wasn't|weren't|ain't|I'm|we're|you're|he's|she's|it's|they're|there's|here's|where's|when's|why's|how's|who's|what's|that's)\b/i,
+    //     advice: "Replace <b>{match}</b> with verbs to avoid to-be."
+    // }, {    
         // checks for negative judgments
         regex: /\b(bad|terrible|awful|horrible|poor|subpar|inferior|inadequate|disappointing|unsatisfactory|mediocre|unacceptable|appalling|dreadful|atrocious|abysmal|lousy|shoddy|deficient|flawed)\b/i,
         advice: "Replace <b>{match}</b> with \"worse than [Average,Typical,Mine,Social,Professional,Everyone]\""
@@ -104,7 +104,7 @@ const pointFunctions = [
         }
         return sum;
     },
-    regexScorer(DRIVE, 3),
+    regexScorer(NEED, 3),
     regexScorer(/\bior\b|\beor\b/, 10),
 ];
 
