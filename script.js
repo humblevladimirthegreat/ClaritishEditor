@@ -13,7 +13,8 @@ const advices = [{
         advice: "Begin your text with <b>Hello+[need]</b> to solidify why you are writing."
     }, {
         // first-person pronoun not followed by need
-        regex: `\\b((?<![-+])I(?!'ll)(?!'m)(?!'ve)|I'll|I'm|I've|me|my|myself)\\b(?!${NEED})`,
+        // regex: `\\b((?<![-+])I(?!'ll)(?!'m)(?!'ve)|I'll|I'm|I've|me|my|myself)\\b(?!${NEED})`,
+        regex: `\\b((?<![-+])my)\\b(?!${NEED})`,
         advice: "Append <b>{match}</b> with [Love,Belonging,Competency,Autonomy,Meaning,Honesty,Peace,Excitement,Survival] to consider how it helps you."
     }, {
         // negative need not followed by perspective
@@ -21,9 +22,9 @@ const advices = [{
         advice: "Append <b>{match}</b> with need to consider long-term perspective."
     }, {
         // 3rd-person pronoun not followed by need
-        regex: `\\b(?:he(?!'ll)(?!'s)|him|his|he's|he'll|himself|she(?!'ll)(?!'s)|her|she's|she'll|herself)\\b(?![?"]${NEED})`,
-        advice: "Add a \" or ? need to <b>{match}</b> to foster empathy."
-    }, {
+        // regex: `\\b(?:he(?!'ll)(?!'s)|him|his|he's|he'll|himself|she(?!'ll)(?!'s)|her|she's|she'll|herself)\\b(?![?"]${NEED})`,
+        // advice: "Add a \" or ? need to <b>{match}</b> to foster empathy."
+    // }, {
         // positive word not followed by @
         regex: `\\b${POSITIVE_WORDS}\\b(?!@)`,
         advice: "Append <b>{match}</b> with the breath-marker <b>@</b> to savor the positive feeling."
