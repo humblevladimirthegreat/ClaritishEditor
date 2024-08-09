@@ -1,7 +1,7 @@
 const POS_D = "\\+[a-z]\\b"
 const NEG_D = "\\-[a-z]\\b"
 const NEED = `(?:${POS_D}|${NEG_D})`
-const NEED_WORDS = "[Love,Belonging,Competency,Autonomy,Meaning,Honesty,Peace,Excitement,Survival,Unknown]"
+const NEED_WORDS = "[Love, Belonging, Competency, Autonomy, Meaning, Honesty, Peace, Excitement, Survival, Don't Know]"
 
 const POSITIVE_WORDS = "(?:absorbed|accomplished|amazed|appreciative|awakened|blessed|blissful|blissfully|calm|calmer|captivated|cheerful|cheery|confident|content|contentment|curious|delighted|delightful|eagerness|eager|eagerly|elated|elation|empowered|empowerment|enchantment|encouraged|energized|engaged|engrossing|engrossment|enthralled|enthralling|entertained|enlightened|euphoria|euphoric|excited|exciting|fabulous|fascinated|fascination|festive|festivity|fortunate|fulfilled|fulfilment|glad|glee|gleeful|gleefully|glorious|grateful|gratified|great|happy|happier|happiest|hopeful|incredible|inspired|interested|jubilant|jubilantly|liberated|lovely|loving|lucky|magical|merriment|motivated|optimistic|passion|passionate|passionately|peace|peaceful|perfect|playful|playfulness|pride|proud|proudly|rapt|refreshed|refreshing|rejuvenated|relieved|relieving|renewed|renewal|revitalized|revitalization|satisfaction|satisfied|terrific|thank|thanks|thankful|thankfully|thrilled|thrilling|triumph|triumphant|victorious|won|wonderful|wondrous)"
 //TODO: add profanity?
@@ -17,19 +17,23 @@ const advices = [{
         // first-person pronoun not followed by need
         // regex: `\\b((?<![-+])I(?!'ll)(?!'m)(?!'ve)|I'll|I'm|I've|me|my|myself)\\b(?!${NEED})`,
         regex: `\\b((?<![-+])my)\\b(?!${NEED})`,
-        advice: `Append <b>{match}</b> with  ${NEED_WORDS} to foster gratitude for this item.`
+        advice: `Append <b>{match}</b> with  ${NEED_WORDS} to foster gratitude for this item.`,
+        showMore: "TODO: help text for gratitude"
     }, {
         //first person indicative of ambivalent thought
         regex: `\\bI (think|figure|believe|feel|suppose|suspect)\\b(?!${NEED})`,
-        advice: `Append <b>{match}</b> with ${NEED_WORDS} to consider how it helps you.`
+        advice: `Append <b>{match}</b> with ${NEED_WORDS} to consider how it helps you.`,
+        showMore: "TODO: help text for first person indicative of ambivalent thought"
     }, {
         // asserting thought of another person
         regex: `\\b(thinks|figures|believes|feels|supposes|suspects)\\b(?!${NEED})`,
-        advice: `Add a " or ? to <b>{match}</b> with ${NEED_WORDS} to foster empathy.`
+        advice: `Add a " or ? to <b>{match}</b> with ${NEED_WORDS} to foster empathy.`,
+        showMore: "TODO: help text for third person empathy"
     }, {
         // negative need not followed by perspective
         regex: `${NEG_D}(?!${POS_D})`, 
-        advice: `Append <b>{match}</b> with ${NEED_WORDS} to consider long-term perspective.`
+        advice: `Append <b>{match}</b> with ${NEED_WORDS} to consider long-term perspective.`,
+        showMore: "TODO: long-term perspective"
     }, {
         // 3rd-person pronoun not followed by need
         // regex: `\\b(?:he(?!'ll)(?!'s)|him|his|he's|he'll|himself|she(?!'ll)(?!'s)|her|she's|she'll|herself)\\b(?![?"]${NEED})`,
@@ -37,35 +41,43 @@ const advices = [{
     // }, {
         // positive word not followed by @
         regex: `\\b${POSITIVE_WORDS}\\b(?!@)`,
-        advice: "Append <b>{match}</b> with the breath-marker <b>@</b> to savor the positive feeling."
+        advice: "Append <b>{match}</b> with the breath-marker <b>@</b> to savor the positive feeling.",
+        showMore: "TODO: positive savor"
     }, {
         // negative word not followed by @
         regex: `\\b${NEGATIVE_WORDS}\\b(?!@)`,
-        advice: "Append <b>{match}</b> with the breath-marker <b>@</b> to ground yourself."
+        advice: "Append <b>{match}</b> with the breath-marker <b>@</b> to ground yourself.",
+        showMore: "TODO: ground yourself"
     }, {
         // negative word and @ not followed by need
         regex: `\\b${NEGATIVE_WORDS}\\b@(?!${NEED})`,
-        advice: "Append <b>{match}</b> with need to consider long-term perspective."
+        advice: "Append <b>{match}</b> with need to consider long-term perspective.",
+        showMore: "TODO: consider long-term perspective"
     }, {    
         // negative judgments not followed by @ and need
         regex: `\\b${NEGATIVE_DESCRIPTORS}(?!@${NEED})`,
-        advice: `Append <b>{match}</b> with breath-marker @ and consider which need they are fulfilling. ${NEED_WORDS}`
+        advice: `Append <b>{match}</b> with breath-marker @ and consider which need they are fulfilling. ${NEED_WORDS}`,
+        showMore: "TODO: negative judgments of people"
     }, {    
         // 'or' -> eor, ior
         regex: /\bor\b/,
-        advice: "Replace <b>{match}</b> with <b>eor</b> or <b>ior</b> to consider other options."
+        advice: "Replace <b>{match}</b> with <b>eor</b> or <b>ior</b> to consider other options.",
+        showMore: "TODO: binary thinking"
     }, {    
         // checks for general statements
         regex: /\b(should|always|never)\b/i,
-        advice: "Replace <b>{match}</b> with \"x implies that...\"."
+        advice: "Replace <b>{match}</b> with \"x implies that...\".",
+        showMore: "TODO: general statements"
     }, {    
         // checks for future tense
         regex: /\b(will|\w+'ll|shall|going to|inteds?|might|tomorrow|soon|someday|(next|this) week(end)?)\b/i,
-        advice: "Replace <b>{match}</b> with plan_[None,Vague,Detail,Contingency] or predict[Never,Sometimes,Mostly,Always,Unknown]."
+        advice: "Replace <b>{match}</b> with plan_[None,Vague,Detail,Contingency] or predict[Never,Sometimes,Mostly,Always,Unknown].",
+        showMore: "TODO: future tense"
     }, {    
         // checks for habitual cases
         regex: /\b(sometimes|again|frequently|often|repeatedly|periodically|intermittently|sporadically)\b/i,
-        advice: "Replace <b>{match}</b> with occasionally/regularly/conditionally."
+        advice: "Replace <b>{match}</b> with occasionally/regularly/conditionally.",
+        showMore: "TODO: habitual case"
     }, {    
         // checks for to be
     //     regex: /\b(be|being|been|am|is|are|was|were|isn't|aren't|wasn't|weren't|ain't|I'm|we're|you're|he's|she's|it's|they're|there's|here's|where's|when's|why's|how's|who's|what's|that's)\b/i,
@@ -73,15 +85,18 @@ const advices = [{
     // }, {    
         // checks for negative standards
         regex: /\b(bad|terrible|awful|horrible|poor|subpar|inferior|inadequate|disappointing|unsatisfactory|mediocre|unacceptable|appalling|dreadful|atrocious|abysmal|lousy|shoddy|deficient|flawed)(ly)?\b/i,
-        advice: "Replace <b>{match}</b> with \"worse than [Average,Typical,Mine,Social,Professional,Everyone]\""
+        advice: "Replace <b>{match}</b> with \"worse than [Average,Typical,Mine,Social,Professional,Everyone]\"",
+        showMore: "TODO: standard comparisons"
     }, {    
         // checks for need/have to
         regex: /\b(need to|have to)\b/i,
-        advice: `Remove <b>{match}</b> and consider why you're really doing it. ${NEED_WORDS}`
+        advice: `Remove <b>{match}</b> and consider why you're really doing it. ${NEED_WORDS}`,
+        showMore: "TODO: need/have to"
     }, {    
         // checks for single problems/solutions/goals
         regex: /\bthe (problem|solution|goal)\b/i,
-        advice: "Consider alternatives for <b>{match}</b>."
+        advice: "Consider alternatives for <b>{match}</b>.",
+        showMore: "TODO: alternatives"
     // }, {    
     //     // checks for past/future tense
     //     regex: /\b(will|\w+'ll|shall|had|did|was|were|used)\b/i,
@@ -178,7 +193,7 @@ function getAdviceMatches(text) {
         for (const match of text.matchAll(new RegExp(expr.regex, 'ig'))) {
             let matchedText = match[0];
             advice = expr.advice.replaceAll("{match}", escapeHtml(matchedText || ''));
-            adviceMatches.push([match.index, matchedText, advice]);
+            adviceMatches.push([match.index, matchedText, advice, expr.showMore]);
         }
     });
     // sort by index, because JS default approach to sort is apparently to coerce the arrays to string first
@@ -203,12 +218,32 @@ function addAdviceReferences(text, adviceMatches) {
     return text;
 }
 
+function getShowMoreOnClick(uuid) {
+    return `var moreText = document.getElementById('moreText_${uuid}');
+        if (moreText.style.display === 'none') {
+            moreText.style.display = 'block';
+            this.innerText = 'Show Less';
+        } else {
+            moreText.style.display = 'none';
+            this.innerText = 'Show More';
+        }
+    `.replaceAll('\n','')
+}
+
+function getShowMoreHtml(hiddenHtml) {
+    uuid = Math.floor(Math.random() * 1000000000000001)
+    // creates a Show More button that when clicked displays hiddenHtml
+    html = `<span id="showMore_${uuid}" class="show-more" onclick="${getShowMoreOnClick(uuid)}">Show More</span>`
+    html += `<div id="moreText_${uuid}" style="display: none;">${hiddenHtml}</div>`
+    return html;
+}
+
 function getAdviceHtml(adviceMatches) {
     var html = "<ol>"
     if (adviceMatches.length > 0) {
         adviceMatches.forEach(adviceMatch => {
             // Create <li> for each match  
-            html += `<li>${adviceMatch[2]}</li>`;
+            html += `<li>${adviceMatch[2]} ${getShowMoreHtml(adviceMatch[3])}</li>`;
         });
         html += "</ol>"
     } else {
