@@ -1,0 +1,10 @@
+{
+  "name": "claritish-editor",
+  "private": true,
+  "scripts": {
+    "lint": "htmlhint --config htmlhint.conf index.xhtml"
+  },
+  "devDependencies": {
+    "htmlhint": "^1.1.4"
+  }
+}
