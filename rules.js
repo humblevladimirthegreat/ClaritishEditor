@@ -29,11 +29,11 @@ const advices = [{
         regex: `\\b(thinks|figures|believes|feels|supposes|suspects)\\b(?!${NEED})`,
         advice: `Add a " or ? to <b>{match}</b> with ${NEED_WORDS} to foster empathy.`,
         showMore: "TODO: help text for third person empathy"
-    }, {
-        // negative need not followed by perspective
-        regex: `${NEG_D}(?!${POS_D})`, 
-        advice: `Append <b>{match}</b> with ${NEED_WORDS} to consider long-term perspective.`,
-        showMore: "TODO: long-term perspective"
+    // }, {
+    //     // negative need not followed by perspective
+    //     regex: `${NEG_D}(?!${POS_D})`, 
+    //     advice: `Append <b>{match}</b> with ${NEED_WORDS} to consider long-term perspective.`,
+    //     showMore: "TODO: long-term perspective"
     }, {
         // 3rd-person pronoun not followed by need
         // regex: `\\b(?:he(?!'ll)(?!'s)|him|his|he's|he'll|himself|she(?!'ll)(?!'s)|her|she's|she'll|herself)\\b(?![?"]${NEED})`,
@@ -48,16 +48,16 @@ const advices = [{
         regex: `\\b${NEGATIVE_WORDS}\\b(?!@)`,
         advice: "Append <b>{match}</b> with the breath-marker <b>@</b> to ground yourself.",
         showMore: "TODO: ground yourself"
-    }, {
-        // negative word and @ not followed by need
-        regex: `\\b${NEGATIVE_WORDS}\\b@(?!${NEED})`,
-        advice: "Append <b>{match}</b> with need to consider long-term perspective.",
-        showMore: "TODO: consider long-term perspective"
-    }, {    
-        // negative judgments not followed by @ and need
-        regex: `\\b${NEGATIVE_DESCRIPTORS}(?!@${NEED})`,
-        advice: `Append <b>{match}</b> with breath-marker @ and consider which need they are fulfilling. ${NEED_WORDS}`,
-        showMore: "TODO: negative judgments of people"
+    // }, {
+    //     // negative word and @ not followed by need
+    //     regex: `\\b${NEGATIVE_WORDS}\\b@(?!${NEED})`,
+    //     advice: "Append <b>{match}</b> with need to consider long-term perspective.",
+    //     showMore: "TODO: consider long-term perspective"
+    // }, {    
+    //     // negative judgments not followed by @ and need
+    //     regex: `\\b${NEGATIVE_DESCRIPTORS}(?!@${NEED})`,
+    //     advice: `Append <b>{match}</b> with breath-marker @ and consider which need they are fulfilling. ${NEED_WORDS}`,
+    //     showMore: "TODO: negative judgments of people"
     }, {    
         // 'or' -> eor, ior
         regex: /\bor\b/,
@@ -71,7 +71,7 @@ const advices = [{
     }, {    
         // checks for future tense
         regex: /\b(will|\w+'ll|shall|going to|inteds?|might|tomorrow|soon|someday|(next|this) week(end)?)\b/i,
-        advice: "Replace <b>{match}</b> with plan_[None,Vague,Detail,Contingency] or predict[Never,Sometimes,Mostly,Always,Unknown].",
+        advice: "Replace <b>{match}</b> with plan_[None,Vague,Detail,Contingency] or predict_[Never,Sometimes,Mostly,Always,Unknown].",
         showMore: "TODO: future tense"
     }, {    
         // checks for habitual cases
