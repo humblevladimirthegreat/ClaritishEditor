@@ -10,35 +10,16 @@ const NEGATIVE_DESCRIPTORS = "(?:asshole|bitch|cunt|dick|fucker|motherfucker|Idi
 
 // List of regex checks for advice 
 const advices = [{    
-        // hello with need
-        // regex: `^(?!hello${NEED})`,
-        // advice: "Begin your text with <b>Hello+[need]</b> to solidify why you are writing."
-    // }, {
-        // first-person pronoun not followed by need
-        // regex: `\\b((?<![-+])I(?!'ll)(?!'m)(?!'ve)|I'll|I'm|I've|me|my|myself)\\b(?!${NEED})`,
+        // first-person personal pronoun not followed by need
         regex: `\\b((?<![-+])my)\\b(?!${NEED})`,
         advice: `Append <b>{match}</b> with  ${NEED_WORDS} to foster gratitude for this item.`,
         showMore: "TODO: help text for gratitude"
     }, {
-        //first person indicative of ambivalent thought
-        regex: `\\bI (think|figure|believe|feel|suppose|suspect)\\b(?!${NEED})`,
-        advice: `Append <b>{match}</b> with ${NEED_WORDS} to consider how it helps you.`,
-        showMore: "TODO: help text for first person indicative of ambivalent thought"
-    }, {
         // asserting thought of another person
         regex: `\\b(thinks|figures|believes|feels|supposes|suspects)\\b(?!${NEED})`,
-        advice: `Add a " or ? to <b>{match}</b> with ${NEED_WORDS} to foster empathy.`,
+        advice: `Add a " or ? to <b>{match}</b> to note whether you're mind-reading.`,
         showMore: "TODO: help text for third person empathy"
-    // }, {
-    //     // negative need not followed by perspective
-    //     regex: `${NEG_D}(?!${POS_D})`, 
-    //     advice: `Append <b>{match}</b> with ${NEED_WORDS} to consider long-term perspective.`,
-    //     showMore: "TODO: long-term perspective"
     }, {
-        // 3rd-person pronoun not followed by need
-        // regex: `\\b(?:he(?!'ll)(?!'s)|him|his|he's|he'll|himself|she(?!'ll)(?!'s)|her|she's|she'll|herself)\\b(?![?"]${NEED})`,
-        // advice: "Add a \" or ? need to <b>{match}</b> to foster empathy."
-    // }, {
         // positive word not followed by @
         regex: `\\b${POSITIVE_WORDS}\\b(?!@)`,
         advice: "Append <b>{match}</b> with the breath-marker <b>@</b> to savor the positive feeling.",
@@ -48,16 +29,6 @@ const advices = [{
         regex: `\\b${NEGATIVE_WORDS}\\b(?!@)`,
         advice: "Append <b>{match}</b> with the breath-marker <b>@</b> to ground yourself.",
         showMore: "TODO: ground yourself"
-    // }, {
-    //     // negative word and @ not followed by need
-    //     regex: `\\b${NEGATIVE_WORDS}\\b@(?!${NEED})`,
-    //     advice: "Append <b>{match}</b> with need to consider long-term perspective.",
-    //     showMore: "TODO: consider long-term perspective"
-    // }, {    
-    //     // negative judgments not followed by @ and need
-    //     regex: `\\b${NEGATIVE_DESCRIPTORS}(?!@${NEED})`,
-    //     advice: `Append <b>{match}</b> with breath-marker @ and consider which need they are fulfilling. ${NEED_WORDS}`,
-    //     showMore: "TODO: negative judgments of people"
     }, {    
         // 'or' -> eor, ior
         regex: /\bor\b/,
@@ -97,10 +68,6 @@ const advices = [{
         regex: /\bthe (problem|solution|goal)\b/i,
         advice: "Consider alternatives for <b>{match}</b>.",
         showMore: "TODO: alternatives"
-    // }, {    
-    //     // checks for past/future tense
-    //     regex: /\b(will|\w+'ll|shall|had|did|was|were|used)\b/i,
-    //     advice: "Replace <b>{match}</b> with a tense word."
     // }, {    
         // checks for subjunctive mood
         // regex: /\b(if|that|would)\b/i,
