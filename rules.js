@@ -13,42 +13,37 @@ const advices = [{
         // first-person personal pronoun not followed by need
         regex: `\\b((?<![-+])my)\\b(?!${NEED})`,
         advice: `Append <b>{match}</b> with  ${NEED_WORDS} to foster gratitude for this item.`,
-        showMore: "TODO: help text for gratitude"
+        showMore: "Tagging possessions with an emotional-need marker (e.g. <b>my+c</b> neighborhood) reminds you what value they provide and fosters gratitude. Claritish replaces bare <b>my</b> with a need code — safety, contentment, excitement, or one of the NVC needs — so you notice why something matters to you instead of taking it for granted."
     }, {
         // asserting thought of another person
         regex: `\\b(thinks|figures|believes|feels|supposes|suspects)\\b(?!${NEED})`,
         advice: `Add a " or ? to <b>{match}</b> to note whether you're mind-reading.`,
-        showMore: "TODO: help text for third person empathy"
+        showMore: "You usually cannot know what someone else thinks or feels unless they told you. Assuming you do is the <b>mind-reading</b> cognitive distortion and often causes conflict. Add <b>\"</b> if they said it, or <b>?</b> if you are guessing — e.g. <b>she?</b> worries vs. <b>she</b> worries."
     }, {
         // positive word not followed by @
         regex: `\\b${POSITIVE_WORDS}\\b(?!@)`,
         advice: "Append <b>{match}</b> with the breath-marker <b>@</b> to savor the positive feeling.",
-        showMore: "TODO: positive savor"
+        showMore: "Positive feelings with high activation are easier to enjoy when you pause and let the energy settle. The breath-marker <b>@</b> after a positive word is a cue to savor the moment — take a breath, notice the feeling in your body, and appreciate it before moving on."
     }, {
         // negative word not followed by @
         regex: `\\b${NEGATIVE_WORDS}\\b(?!@)`,
         advice: "Append <b>{match}</b> with the breath-marker <b>@</b> to ground yourself.",
-        showMore: "TODO: ground yourself"
+        showMore: "Strong negative feelings can hijack your thinking. The breath-marker <b>@</b> after a negative word prompts you to ground yourself — pause, breathe, and feel the sensation without immediately acting on it. This helps regulate emotion before you respond."
     }, {    
         // 'or' -> eor, ior
         regex: /\bor\b/,
         advice: "Replace <b>{match}</b> with <b>eor</b> or <b>ior</b> to consider other options.",
-        showMore: "TODO: binary thinking"
+        showMore: "<b>eor</b> (exhaustive or) means the listed options are the only ones possible; <b>ior</b> (inexhaustive or) means other options may exist too. Marking which kind of \"or\" you mean makes False Dichotomies easier to catch — when someone says only A or B is possible, hearing <b>eor</b> prompts both speaker and listener to ask whether the list is truly complete. Example: \"You are either with us <b>eor</b> against us\" invites the question: are there other stances besides those two?"
     }, {    
         // checks for general statements
         regex: /\b(should|always|never)\b/i,
         advice: "Replace <b>{match}</b> with \"x implies that...\".",
-        showMore: "TODO: general statements"
+        showMore: "Words like <b>should</b>, <b>always</b>, and <b>never</b> often signal overgeneralization — a broad rule stated without justification or counterexamples. Replacing them with <b>x implies that...</b> forces you to name the underlying claim and who it comes from (fact, preference, or source). Example: instead of \"hard work should earn a promotion,\" write \"my desire implies that large effort is sufficient for a promotion\" — making clear it is your hope, not a universal law, and inviting you to look for exceptions."
     }, {    
         // checks for future tense
         regex: /\b(will|\w+'ll|shall|going to|inteds?|might|tomorrow|soon|someday|(next|this) week(end)?)\b/i,
         advice: "Replace <b>{match}</b> with plan_[None,Vague,Detail,Contingency] or predict_[Never,Sometimes,Mostly,Always,Unknown].",
-        showMore: "TODO: future tense"
-    }, {    
-        // checks for habitual cases
-        regex: /\b(sometimes|again|frequently|often|repeatedly|periodically|intermittently|sporadically)\b/i,
-        advice: "Replace <b>{match}</b> with occasionally/regularly/conditionally.",
-        showMore: "TODO: habitual case"
+        showMore: "We cannot know the future for certain. Claritish splits future claims into <b>predict_</b> (how likely a pattern is: Never, Sometimes, Mostly, Always, Unknown) and <b>plan_</b> (how much planning backs an intention: None, Vague, Detail, Contingency). This prompts you to ask whether a forecast is well supported and whether you have done enough planning — e.g. <b>predict_Mostly</b> it rains vs. <b>plan_Contingency</b> I finish the report by Friday."
     }, {    
         // checks for to be
     //     regex: /\b(be|being|been|am|is|are|was|were|isn't|aren't|wasn't|weren't|ain't|I'm|we're|you're|he's|she's|it's|they're|there's|here's|where's|when's|why's|how's|who's|what's|that's)\b/i,
@@ -57,21 +52,17 @@ const advices = [{
         // checks for negative standards
         regex: /\b(bad|terrible|awful|horrible|poor|subpar|inferior|inadequate|disappointing|unsatisfactory|mediocre|unacceptable|appalling|dreadful|atrocious|abysmal|lousy|shoddy|deficient|flawed)(ly)?\b/i,
         advice: "Replace <b>{match}</b> with \"worse than [Average,Typical,Mine,Social,Professional,Everyone]\"",
-        showMore: "TODO: standard comparisons"
+        showMore: "Negative judgments like <b>bad</b> or <b>terrible</b> usually hide an implicit comparison — often to professionals or curated media. Claritish has no bare \"bad\"; you must say <b>worse than [Average, Typical, Mine, Social, Professional, Everyone]</b>. Naming the benchmark helps you spot unfair standards, e.g. \"I am worse than Professional at singing\" may reveal you are judging yourself against experts."
     }, {    
         // checks for need/have to
         regex: /\b(need to|have to)\b/i,
         advice: `Remove <b>{match}</b> and consider why you're really doing it. ${NEED_WORDS}`,
-        showMore: "TODO: need/have to"
+        showMore: `<b>Need to</b> and <b>have to</b> can disguise a real emotional motive or make choices feel coerced. Removing them and naming the need you intend to fill — ${NEED_WORDS} — makes the reason explicit and puts you back in choice. Example: instead of "I have to apologize," consider "I+Peace am apologizing" (to restore peace).`
     }, {    
         // checks for single problems/solutions/goals
         regex: /\bthe (problem|solution|goal)\b/i,
         advice: "Consider alternatives for <b>{match}</b>.",
-        showMore: "TODO: alternatives"
-    // }, {    
-        // checks for subjunctive mood
-        // regex: /\b(if|that|would)\b/i,
-        // advice: "Replace <b>{match}</b> with a mood word."
+        showMore: "Creativity research shows better outcomes when you generate multiple ideas rather than stopping at one. Claritish requires numbered forms — <b>problem1</b>, <b>solution2</b>, <b>goal3</b> — instead of <b>the problem</b> or <b>the solution</b>. Numbering reminds both speaker and listener to look for additional problems, goals, and solutions."
     }, 
   ];
 
