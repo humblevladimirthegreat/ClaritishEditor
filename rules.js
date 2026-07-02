@@ -44,6 +44,11 @@ const advices = [{
         regex: /\b(will|\w+'ll|shall|going to|inteds?|might|tomorrow|soon|someday|(next|this) week(end)?)\b/i,
         advice: "Replace <b>{match}</b> with plan_[None,Vague,Detail,Contingency] or predict_[Never,Sometimes,Mostly,Always,Unknown].",
         showMore: "We cannot know the future for certain. Claritish splits future claims into <b>predict_</b> (how likely a pattern is: Never, Sometimes, Mostly, Always, Unknown) and <b>plan_</b> (how much planning backs an intention: None, Vague, Detail, Contingency). This prompts you to ask whether a forecast is well supported and whether you have done enough planning — e.g. <b>predict_Mostly</b> it rains vs. <b>plan_Contingency</b> I finish the report by Friday."
+    }, {
+        // checks for past tense / memory claims
+        regex: /\b(was|were|had|did|remember|recall|forgot|realized|knew|thought|yesterday|last (week|month|year)|(\d+|many) (days|weeks|months|years) ago|back then|used to|always (was|were|had))\b/i,
+        advice: "Replace <b>{match}</b> with source_[None,Inferred,Told,Felt,Story,Recorded,Witnessed].",
+        showMore: "Past claims often mix what happened with what we inferred, were told, or have turned into a story. Claritish tags where the claim really comes from with <b>source_</b>: <b>None</b> (unchecked recall), <b>Inferred</b> (deduced), <b>Told</b> (secondhand), <b>Felt</b> (emotion as evidence), <b>Story</b> (a rehearsed narrative), <b>Recorded</b> (diary, text, photo), <b>Witnessed</b> (directly perceived). Picking the honest source catches hearsay-as-memory, emotional reasoning, and hindsight narratives — e.g. <b>source_Told</b> everyone hated the presentation vs. <b>source_Witnessed</b> two people walked out."
     }, {    
         // checks for to be
     //     regex: /\b(be|being|been|am|is|are|was|were|isn't|aren't|wasn't|weren't|ain't|I'm|we're|you're|he's|she's|it's|they're|there's|here's|where's|when's|why's|how's|who's|what's|that's)\b/i,
