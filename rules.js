@@ -3,14 +3,14 @@ const NEG_D = "\\-[a-z]\\b"
 const VALUE = `(?:${POS_D}|${NEG_D})`
 const VALUE_WORDS = "[autonomy, competence, relatedness, pleasure, unspecified]"
 
-// Mindfulness noting: l/h/f/s/t/m glued after sentence-ending punctuation
+// Mindfulness noting: first-person attitude/stance verbs that often mark rumination get _l/_h/_f/_s/_t/_m
 const NOTE_LETTERS = "[lhfstm]"
 const NOTE_SENSES = "looking, hearing, feeling, smelling, tasting, minding"
-const ABBREV = String.raw`(?:Mr|Mrs|Ms|Dr|Prof|Jr|Sr|vs|etc|Inc|Ltd|St|Vol|Fig|approx|Jan|Feb|Mar|Apr|Jun|Jul|Aug|Sep|Sept|Oct|Nov|Dec)`
-// Terminator only when optional noting letter is then whitespace/end (skips decimals, ellipsis, abbrevs, .txt)
-const SENT_END = String.raw`(?:(?<!\d)(?<!\.)(?<!${ABBREV})(?<!\b[aeip])(?<!\b[gm])\.(?!\d|\.)|[?!])(?=${NOTE_LETTERS}?(?:\s|$))`
-const NOTE_VIOLATION = `${SENT_END}(?!${NOTE_LETTERS}(?:\\s|$))`
-const NOTE_FOLLOWED = `${SENT_END}${NOTE_LETTERS}(?=\\s|$)`
+const ATTITUDE_WORDS = String.raw`(?:think|thinking|believe|believing|fear|fearing|hope|hoping|doubt|doubting|suspect|suspecting|worry|worrying|wonder|wondering|assume|assuming|imagine|imagining|regret|regretting|suppose|supposing|wish|wishing|dread|dreading|expect|expecting|anticipate|anticipating|realize|realizing|realise|realising|overthink|overthinking|ruminate|ruminating|obsess|obsessing)`
+// I/we (+ optional contraction or auxiliary) then the attitude verb
+const FIRST_PERSON = String.raw`(?:I|i|we|We)(?:'(?:m|ve|d))?(?:\s+(?:am|are|was|were|have|had|keep|kept|start(?:ed)?|begin(?:ning)?))?`
+const NOTE_VIOLATION = String.raw`\b${FIRST_PERSON}\s+${ATTITUDE_WORDS}\b`
+const NOTE_FOLLOWED = String.raw`\b${FIRST_PERSON}\s+${ATTITUDE_WORDS}_${NOTE_LETTERS}\b`
 
 // Flag N% / N percent unless reference class or change framing is explicit (see rules)
 const BARE_PERCENT_REGEX = String.raw`(?<!(?:from|to|top|bottom)\s)\b\d+(?:\.\d+)?(?:%|\s+percent\b)(?!\s*(?:of\b|relative\s+to\b|(?:complete|done|finished|full)\b))`
@@ -18,12 +18,12 @@ const FOLLOWED_PERCENT_REGEX = String.raw`(?:\b\d+(?:\.\d+)?(?:%|\s+percent)\s+o
 
 // Claritish rules: violation regex, followed regex, and points per followed match
 const rules = [{
-        // mindfulness noting after sentence-ending punctuation
+        // mindfulness noting on attitude/stance verbs (rumination cues)
         violation: NOTE_VIOLATION,
         followed: NOTE_FOLLOWED,
         points: 1,
-        description: `Append a noting letter after <b>{match}</b> (l/h/f/s/t/m for ${NOTE_SENSES}) for what stands out most.`,
-        showMore: `Mindfulness noting labels the sense or mental mode that stands out most in the sentence — <b>l</b>ooking, <b>h</b>earing, <b>f</b>eeling, <b>s</b>melling, <b>t</b>asting, or <b>m</b>inding. Glue the letter to the sentence end: <b>I saw the tree sway.l Birds called nearby.h I felt cold.f</b> Only complete sentences with <b>.</b> <b>?</b> or <b>!</b> need a note; pick one letter for whatever is most salient, not every modality.`
+        description: `Append the attitude verb in <b>{match}</b> with a noting tag (_l/_h/_f/_s/_t/_m for ${NOTE_SENSES}) for what stands out most.`,
+        showMore: `First-person attitude and stance verbs (<b>I think</b>, <b>I fear</b>, <b>we worry</b>, <b>I'm assuming</b>, …) often mark rumination — the mind commenting on experience rather than contacting it. Mindfulness noting labels the sense or mental mode that stands out most: <b>l</b>ooking, <b>h</b>earing, <b>f</b>eeling, <b>s</b>melling, <b>t</b>asting, or <b>m</b>inding. Append one tag to the verb: <b>I think_m she'll be late. I fear_f the meeting. I imagine_l the shoreline.</b> Only first-person forms need a note; pick whatever is most salient, not every modality.`
     }, {
         // first-person personal pronoun not followed by value
         violation: `\\b((?<![-+])my)\\b(?!${VALUE})`,
