@@ -1,7 +1,7 @@
 const POS_D = "\\+[a-z]\\b"
 const NEG_D = "\\-[a-z]\\b"
-const NEED = `(?:${POS_D}|${NEG_D})`
-const NEED_WORDS = "[Love, Belonging, Competency, Autonomy, Meaning, Honesty, Peace, Excitement, Survival, Don't Know]"
+const VALUE = `(?:${POS_D}|${NEG_D})`
+const VALUE_WORDS = "[autonomy, competence, relatedness, pleasure, unspecified]"
 
 // Flag N% / N percent unless reference class or change framing is explicit (see advices)
 const BARE_PERCENT_REGEX = String.raw`(?<!(?:from|to|top|bottom)\s)\b\d+(?:\.\d+)?(?:%|\s+percent\b)(?!\s*(?:of\b|relative\s+to\b|(?:complete|done|finished|full)\b))`
@@ -13,13 +13,13 @@ const NEGATIVE_DESCRIPTORS = "(?:asshole|bitch|cunt|dick|fucker|motherfucker|Idi
 
 // List of regex checks for advice 
 const advices = [{    
-        // first-person personal pronoun not followed by need
-        regex: `\\b((?<![-+])my)\\b(?!${NEED})`,
-        advice: `Append <b>{match}</b> with  ${NEED_WORDS} to foster gratitude for this item.`,
-        showMore: "Tagging possessions with an emotional-need marker (e.g. <b>my+c</b> neighborhood) reminds you what value they provide and fosters gratitude. Claritish replaces bare <b>my</b> with a need code — safety, contentment, excitement, or one of the NVC needs — so you notice why something matters to you instead of taking it for granted."
+        // first-person personal pronoun not followed by value
+        regex: `\\b((?<![-+])my)\\b(?!${VALUE})`,
+        advice: `Append <b>{match}</b> with a value tag (a/c/r/p/u for ${VALUE_WORDS}) to foster gratitude for this item.`,
+        showMore: "Tagging possessions with a value marker (e.g. <b>my+c</b> neighborhood for competence) reminds you what value they provide and fosters gratitude. Claritish replaces bare <b>my</b> with a value code — <b>+a</b> autonomy, <b>+c</b> competence, <b>+r</b> relatedness, <b>+p</b> pleasure, <b>+u</b> unspecified (or <b>-</b> when unmet) — so you notice why something matters to you instead of taking it for granted."
     }, {
         // asserting thought of another person
-        regex: `\\b(thinks|figures|believes|feels|supposes|suspects)\\b(?!${NEED})`,
+        regex: `\\b(thinks|figures|believes|feels|supposes|suspects)\\b(?!${VALUE})`,
         advice: `Add a " or ? to <b>{match}</b> to note whether you're mind-reading.`,
         showMore: "You usually cannot know what someone else thinks or feels unless they told you. Assuming you do is the <b>mind-reading</b> cognitive distortion and often causes conflict. Add <b>\"</b> if they said it, or <b>?</b> if you are guessing — e.g. <b>she?</b> worries vs. <b>she</b> worries."
     }, {
@@ -64,8 +64,8 @@ const advices = [{
     }, {    
         // checks for need/have to
         regex: /\b(need to|have to)\b/i,
-        advice: `Remove <b>{match}</b> and consider why you're really doing it. ${NEED_WORDS}`,
-        showMore: `<b>Need to</b> and <b>have to</b> can disguise a real emotional motive or make choices feel coerced. Removing them and naming the need you intend to fill — ${NEED_WORDS} — makes the reason explicit and puts you back in choice. Example: instead of "I have to apologize," consider "I+Peace am apologizing" (to restore peace).`
+        advice: `Remove <b>{match}</b> and consider why you're really doing it. ${VALUE_WORDS} (a/c/r/p/u)`,
+        showMore: `<b>Need to</b> and <b>have to</b> can disguise a real emotional motive or make choices feel coerced. Removing them and naming the value you intend to fill — ${VALUE_WORDS} (a/c/r/p/u) — makes the reason explicit and puts you back in choice. Example: instead of "I have to apologize," consider "I+r am apologizing" (to restore relatedness).`
     }, {    
         // checks for single problems/solutions/goals
         regex: /\bthe (problem|solution|goal)\b/i,
@@ -109,6 +109,6 @@ const pointFunctions = [
         }
         return sum;
     },
-    regexScorer(NEED, 3),
+    regexScorer(VALUE, 3),
     regexScorer(/\bior\b|\beor\b/, 10),
 ];
