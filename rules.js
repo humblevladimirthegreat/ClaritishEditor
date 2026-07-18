@@ -22,20 +22,20 @@ const rules = [{
         points: 1,
         description: `Add a " or ? to <b>{match}</b> to note whether you're mind-reading.`,
         showMore: "You usually cannot know what someone else thinks or feels unless they told you. Assuming you do is the <b>mind-reading</b> cognitive distortion and often causes conflict. Add <b>\"</b> if they said it, or <b>?</b> if you are guessing — e.g. <b>she?</b> worries vs. <b>she</b> worries."
-    }, {
-        // positive word not followed by @
-        violation: `\\b${POSITIVE_WORDS}\\b(?!@)`,
-        followed: `\\b${POSITIVE_WORDS}@`,
+    },     {
+        // positive word (banned)
+        violation: `\\b${POSITIVE_WORDS}\\b`,
+        followed: VALUE,
         points: 1,
-        description: "Append <b>{match}</b> with the breath-marker <b>@</b> to savor the positive feeling.",
-        showMore: "Positive feelings with high activation are easier to enjoy when you pause and let the energy settle. The breath-marker <b>@</b> after a positive word is a cue to savor the moment — take a breath, notice the feeling in your body, and appreciate it before moving on."
+        description: `Replace <b>{match}</b> with a more neutral description; append a value tag (a/c/r/p/u for ${VALUE_WORDS}) to the word you are judging.`,
+        showMore: `Loaded positive words smuggle judgment into the sentence. Claritish drops them so you describe what happened in neutral terms and name which value is met on the word you are judging — e.g. <b>gift+r</b> instead of calling it wonderful. Tags: <b>+a</b> autonomy, <b>+c</b> competence, <b>+r</b> relatedness, <b>+p</b> pleasure, <b>+u</b> unspecified (or <b>-</b> when unmet).`
     }, {
-        // negative word not followed by @
-        violation: `\\b${NEGATIVE_WORDS}\\b(?!@)`,
-        followed: `\\b${NEGATIVE_WORDS}@`,
+        // negative word (banned)
+        violation: `\\b${NEGATIVE_WORDS}\\b`,
+        followed: VALUE,
         points: 1,
-        description: "Append <b>{match}</b> with the breath-marker <b>@</b> to ground yourself.",
-        showMore: "Strong negative feelings can hijack your thinking. The breath-marker <b>@</b> after a negative word prompts you to ground yourself — pause, breathe, and feel the sensation without immediately acting on it. This helps regulate emotion before you respond."
+        description: `Replace <b>{match}</b> with a more neutral description; append a value tag (a/c/r/p/u for ${VALUE_WORDS}) to the word you are judging.`,
+        showMore: `Loaded negative words smuggle judgment into the sentence. Claritish drops them so you describe what happened in neutral terms and name which value is unmet on the word you are judging — e.g. <b>meeting-a</b> instead of calling it awful. Tags: <b>+a</b> autonomy, <b>+c</b> competence, <b>+r</b> relatedness, <b>+p</b> pleasure, <b>+u</b> unspecified (or <b>-</b> when unmet).`
     }, {
         // 'or' -> eor, ior
         violation: /\bor\b/,
