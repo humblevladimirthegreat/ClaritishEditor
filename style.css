@@ -335,6 +335,18 @@ body {
   margin: 0 0 var(--space-sm);
 }
 
+.advice-name,
+.features-name {
+  display: block;
+  margin: 0 0 var(--space-xs);
+  font-family: var(--font-sans);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-sage-dark);
+}
+
 .advice-summary::before {
   content: counter(list-item) ". ";
   font-weight: 600;

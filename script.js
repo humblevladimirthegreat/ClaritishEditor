@@ -56,7 +56,7 @@ function getAdviceMatches(text) {
         for (const match of text.matchAll(new RegExp(rule.violation, 'ig'))) {
             let matchedText = match[0];
             advice = rule.description.replaceAll("{match}", escapeHtml(matchedText || ''));
-            adviceMatches.push([match.index, matchedText, advice, rule.showMore]);
+            adviceMatches.push([match.index, matchedText, advice, rule.showMore, rule.name]);
         }
     });
     // sort by index, because JS default approach to sort is apparently to coerce the arrays to string first
@@ -82,8 +82,9 @@ function addAdviceReferences(text, adviceMatches) {
     return text;
 }
 
-function getAdviceItemHtml(summaryHtml, detailHtml) {
+function getAdviceItemHtml(nameHtml, summaryHtml, detailHtml) {
     return `<li class="advice-item">
+        <strong class="advice-name">${nameHtml}</strong>
         <p class="advice-summary">${summaryHtml}</p>
         <button type="button" class="show-more">Show more</button>
         <div class="advice-detail" hidden="hidden">${detailHtml}</div>
@@ -94,7 +95,7 @@ function getAdviceHtml(adviceMatches) {
     if (adviceMatches.length > 0) {
         var html = '<ol class="advice-list">';
         adviceMatches.forEach(adviceMatch => {
-            html += getAdviceItemHtml(adviceMatch[2], adviceMatch[3]);
+            html += getAdviceItemHtml(escapeHtml(adviceMatch[4]), adviceMatch[2], adviceMatch[3]);
         });
         html += '</ol>';
         return html;
@@ -105,7 +106,7 @@ function getAdviceHtml(adviceMatches) {
 function getFeaturesHtml() {
     var html = '<ul class="features-list">';
     rules.forEach(rule => {
-        html += `<li class="features-item">${rule.showMore}</li>`;
+        html += `<li class="features-item"><strong class="features-name">${escapeHtml(rule.name)}</strong>${rule.showMore}</li>`;
     });
     html += '</ul>';
     return html;
