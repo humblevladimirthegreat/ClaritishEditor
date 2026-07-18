@@ -1,68 +1,86 @@
-var textbox = document.querySelector('#textbox');
-var advicebox = document.querySelector('#advicebox');
-var timeoutID = null;
-var filenameBox = document.querySelector('#filename');
+import { EditorState, StateEffect, StateField } from "@codemirror/state";
+import {
+    EditorView,
+    Decoration,
+    hoverTooltip,
+    placeholder,
+} from "@codemirror/view";
+import { minimalSetup } from "codemirror";
 
-// Automatically load/save cache in local storage when opening and closing the page
-textbox.value = localStorage.getItem('browserpad') || '';
-textbox.setSelectionRange(textbox.value.length, textbox.value.length); // Place caret at end of content
-calcScore(); // Update counters after loading
-function storeLocally() { localStorage.setItem('browserpad', textbox.value); }
-window.beforeunload = storeLocally;
+const rules = window.rules;
+const advicebox = document.querySelector('#advicebox');
+const editorHost = document.querySelector('#textbox');
+const timeoutID = { id: null };
+const filenameBox = document.querySelector('#filename');
 
-//keep track of how many distinct days the page has been opened
-if(localStorage.getItem('daysVisited') === null) {
-    localStorage.setItem('daysVisited', ''); 
-  }
-const dateString = new Date().toISOString().slice(0,10);
-// daysVisited is stored as comma-separated list of YYYY_MM_DD 
-let daysVisited = localStorage.getItem('daysVisited').split(','); 
-  
-if(!daysVisited.includes(dateString)) {
-    daysVisited.push(dateString); 
-    localStorage.setItem('daysVisited', daysVisited.join(','));
+let editorView;
+let currentAdviceMatches = [];
+
+const setAdviceMarks = StateEffect.define();
+
+const adviceMarksField = StateField.define({
+    create() {
+        return Decoration.none;
+    },
+    update(deco, tr) {
+        deco = deco.map(tr.changes);
+        for (const effect of tr.effects) {
+            if (effect.is(setAdviceMarks)) {
+                deco = effect.value;
+            }
+        }
+        return deco;
+    },
+    provide: (field) => EditorView.decorations.from(field),
+});
+
+function getText() {
+    return editorView.state.doc.toString();
 }
-document.querySelector('#days').textContent = daysVisited.length;
 
-document.querySelector('#updated').textContent = new Date(document.lastModified)
-    .toLocaleString(undefined, {
-        year: 'numeric', month: 'short', day: 'numeric',
-        hour: 'numeric', minute: '2-digit'
+function setText(str) {
+    editorView.dispatch({
+        changes: { from: 0, to: editorView.state.doc.length, insert: str },
+        selection: { anchor: str.length },
     });
+}
 
-// Set the filename placeholder to have the date
-filenameBox.placeholder = "claritish_" + dateString + ".txt";
+function clearAdviceMarks() {
+    currentAdviceMatches = [];
+    editorView.dispatch({ effects: setAdviceMarks.of(Decoration.none) });
+}
 
-// Allow inputting tabs in the textarea instead of changing focus to the next element
-textbox.onkeypress = function (event) {
-    if (event.key === "Tab") {
-        event.preventDefault();
-        var text = this.value, s = this.selectionStart, e = this.selectionEnd;
-        this.value = text.substring(0, s) + '\t' + text.substring(e);
-        this.selectionStart = this.selectionEnd = s + 1;
+function storeLocally() {
+    localStorage.setItem('browserpad', getText());
+}
+
+function calcScore() {
+    const text = getText();
+    let score = 0;
+    for (const rule of rules) {
+        const matches = text.match(new RegExp(rule.followed, 'ig'));
+        if (matches) score += matches.length * rule.points;
     }
-};
+    document.querySelector('#score').textContent = score;
+}
 
-// Auto-save to local storage and calculate score on every keystroke
-textbox.onkeyup = function () {
+function onEditorUpdate(update) {
+    if (!update.docChanged) return;
     calcScore();
-    window.clearTimeout(timeoutID); // Prevent saving too frequently
-    timeoutID = window.setTimeout(storeLocally, 1000);
-};
+    window.clearTimeout(timeoutID.id);
+    timeoutID.id = window.setTimeout(storeLocally, 1000);
+}
 
 function getAdviceMatches(text) {
-    var adviceMatches = [];
-    rules.forEach(rule => {
+    const adviceMatches = [];
+    rules.forEach((rule) => {
         for (const match of text.matchAll(new RegExp(rule.violation, 'ig'))) {
-            let matchedText = match[0];
-            advice = rule.description.replaceAll("{match}", escapeHtml(matchedText || ''));
+            const matchedText = match[0];
+            const advice = rule.description.replaceAll("{match}", escapeHtml(matchedText || ''));
             adviceMatches.push([match.index, matchedText, advice, rule.showMore, rule.name]);
         }
     });
-    // sort by index, because JS default approach to sort is apparently to coerce the arrays to string first
-    adviceMatches.sort((a, b) => {
-        return a[0] - b[0];
-    });
+    adviceMatches.sort((a, b) => a[0] - b[0]);
     return adviceMatches;
 }
 
@@ -70,20 +88,55 @@ function removeAdviceReferences(text) {
     return text.replace(/\[\d+\]/g, '');
 }
 
-
-function addAdviceReferences(text, adviceMatches) {
-    //do it in reverse order so the match indexes remain valid
-    for (let i = adviceMatches.length - 1; i >= 0; i--) {
-        // the position of the end of the matched text
-        index = adviceMatches[i][0] + adviceMatches[i][1].length;
-        // insert the reference at end of matched text. Use 1-indexing for correspondence with ordered list
-        text = text.substring(0, index) + `[${i+1}]` + text.substring(index);
-    }
-    return text;
+function buildAdviceDecorations(matches) {
+    const marks = matches.map((match, index) => {
+        const from = match[0];
+        const to = from + match[1].length;
+        return Decoration.mark({
+            class: "cm-advice-mark",
+            attributes: { "data-advice-index": String(index) },
+        }).range(from, to);
+    });
+    return Decoration.set(marks, true);
 }
 
-function getAdviceItemHtml(nameHtml, summaryHtml, detailHtml) {
-    return `<li class="advice-item">
+function getAdviceIndexAt(pos) {
+    for (let i = 0; i < currentAdviceMatches.length; i++) {
+        const from = currentAdviceMatches[i][0];
+        const to = from + currentAdviceMatches[i][1].length;
+        if (pos >= from && pos <= to) return i;
+    }
+    return null;
+}
+
+function stripHtml(html) {
+    const el = document.createElement('div');
+    el.innerHTML = html;
+    return el.textContent || '';
+}
+
+function focusAdviceItem(index) {
+    const item = advicebox.querySelector(`[data-advice-index="${index}"]`);
+    if (!item) return;
+    item.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    item.classList.add('advice-focused');
+    window.setTimeout(() => item.classList.remove('advice-focused'), 2000);
+}
+
+function scrollEditorToAdvice(index) {
+    const match = currentAdviceMatches[index];
+    if (!match) return;
+    const from = match[0];
+    const to = from + match[1].length;
+    editorView.dispatch({
+        selection: { anchor: from, head: to },
+        effects: EditorView.scrollIntoView(from, { y: 'center' }),
+    });
+    editorView.focus();
+}
+
+function getAdviceItemHtml(index, nameHtml, summaryHtml, detailHtml) {
+    return `<li class="advice-item" data-advice-index="${index}">
         <strong class="advice-name">${nameHtml}</strong>
         <p class="advice-summary">${summaryHtml}</p>
         <button type="button" class="show-more">Show more</button>
@@ -93,9 +146,14 @@ function getAdviceItemHtml(nameHtml, summaryHtml, detailHtml) {
 
 function getAdviceHtml(adviceMatches) {
     if (adviceMatches.length > 0) {
-        var html = '<ol class="advice-list">';
-        adviceMatches.forEach(adviceMatch => {
-            html += getAdviceItemHtml(escapeHtml(adviceMatch[4]), adviceMatch[2], adviceMatch[3]);
+        let html = '<ol class="advice-list">';
+        adviceMatches.forEach((adviceMatch, index) => {
+            html += getAdviceItemHtml(
+                index,
+                escapeHtml(adviceMatch[4]),
+                adviceMatch[2],
+                adviceMatch[3],
+            );
         });
         html += '</ol>';
         return html;
@@ -104,8 +162,8 @@ function getAdviceHtml(adviceMatches) {
 }
 
 function getFeaturesHtml() {
-    var html = '<ul class="features-list">';
-    rules.forEach(rule => {
+    let html = '<ul class="features-list">';
+    rules.forEach((rule) => {
         html += `<li class="features-item"><strong class="features-name">${escapeHtml(rule.name)}</strong>${rule.showMore}</li>`;
     });
     html += '</ul>';
@@ -123,39 +181,165 @@ function updateAdvicebox(html) {
     });
 }
 
+function escapeHtml(unsafeText) {
+    return unsafeText
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
+const adviceHoverTooltip = hoverTooltip((view, pos) => {
+    const index = getAdviceIndexAt(pos);
+    if (index === null) return null;
+    const match = currentAdviceMatches[index];
+    const from = match[0];
+    const to = from + match[1].length;
+    return {
+        pos: from,
+        end: to,
+        above: true,
+        create() {
+            const dom = document.createElement('div');
+            dom.className = 'cm-advice-tooltip';
+            const title = document.createElement('strong');
+            title.textContent = match[4];
+            const summary = document.createElement('p');
+            summary.textContent = stripHtml(match[2]);
+            dom.append(title, summary);
+            return { dom };
+        },
+    };
+});
+
+const editorTheme = EditorView.theme({
+    "&": {
+        height: "100%",
+        backgroundColor: "transparent",
+    },
+    ".cm-scroller": {
+        fontFamily: 'var(--font-sans)',
+        lineHeight: "1.55",
+    },
+    ".cm-content": {
+        fontFamily: 'inherit',
+        fontSize: "var(--editor-font-size)",
+        lineHeight: "inherit",
+        color: "var(--color-ink)",
+        caretColor: "var(--color-ink)",
+        padding: "var(--space-lg) var(--space-xl)",
+    },
+    ".cm-gutters": {
+        display: "none",
+    },
+    "&.cm-focused .cm-cursor": {
+        borderLeftColor: "var(--color-ink)",
+    },
+    "&.cm-focused .cm-selectionBackground, .cm-selectionBackground": {
+        backgroundColor: "rgba(74, 107, 82, 0.2) !important",
+    },
+    ".cm-activeLine": {
+        backgroundColor: "transparent",
+    },
+    ".cm-placeholder": {
+        color: "var(--color-ink-faint)",
+        fontStyle: "normal",
+    },
+});
+
+let savedText = removeAdviceReferences(localStorage.getItem('browserpad') || '');
+
+const editorExtensions = [
+    ...minimalSetup,
+    EditorView.lineWrapping,
+    placeholder("Write here…"),
+    adviceMarksField,
+    adviceHoverTooltip,
+    editorTheme,
+    EditorView.updateListener.of(onEditorUpdate),
+    EditorView.domEventHandlers({
+        click(event, view) {
+            const pos = view.posAtCoords({ x: event.clientX, y: event.clientY });
+            if (pos == null) return false;
+            const index = getAdviceIndexAt(pos);
+            if (index === null) return false;
+            focusAdviceItem(index);
+            return false;
+        },
+    }),
+];
+
+editorView = new EditorView({
+    state: EditorState.create({
+        doc: savedText,
+        extensions: editorExtensions,
+    }),
+    parent: editorHost,
+});
+
+editorView.focus();
+calcScore();
+window.beforeunload = storeLocally;
+
+if (localStorage.getItem('daysVisited') === null) {
+    localStorage.setItem('daysVisited', '');
+}
+const dateString = new Date().toISOString().slice(0, 10);
+let daysVisited = localStorage.getItem('daysVisited').split(',');
+
+if (!daysVisited.includes(dateString)) {
+    daysVisited.push(dateString);
+    localStorage.setItem('daysVisited', daysVisited.join(','));
+}
+document.querySelector('#days').textContent = daysVisited.length;
+
+document.querySelector('#updated').textContent = new Date(document.lastModified)
+    .toLocaleString(undefined, {
+        year: 'numeric', month: 'short', day: 'numeric',
+        hour: 'numeric', minute: '2-digit',
+    });
+
+filenameBox.placeholder = "claritish_" + dateString + ".txt";
+
 advicebox.addEventListener('click', function (event) {
-    var button = event.target.closest('.show-more');
-    if (!button) return;
-    var item = button.closest('.advice-item');
+    const button = event.target.closest('.show-more');
+    if (button) {
+        const item = button.closest('.advice-item');
+        if (!item) return;
+        const detail = item.querySelector('.advice-detail');
+        if (!detail) return;
+        const isHidden = detail.hasAttribute('hidden');
+        if (isHidden) {
+            detail.removeAttribute('hidden');
+            button.textContent = 'Show less';
+        } else {
+            detail.setAttribute('hidden', 'hidden');
+            button.textContent = 'Show more';
+        }
+        return;
+    }
+
+    const item = event.target.closest('.advice-item[data-advice-index]');
     if (!item) return;
-    var detail = item.querySelector('.advice-detail');
-    if (!detail) return;
-    var isHidden = detail.hasAttribute('hidden');
-    if (isHidden) {
-        detail.removeAttribute('hidden');
-        button.textContent = 'Show less';
-    } else {
-        detail.setAttribute('hidden', 'hidden');
-        button.textContent = 'Show more';
+    const index = Number(item.dataset.adviceIndex);
+    if (!Number.isNaN(index)) {
+        scrollEditorToAdvice(index);
     }
 });
 
-function escapeHtml(unsafeText) {
-    return unsafeText
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-      .replace(/"/g, "&quot;")
-      .replace(/'/g, "&#039;");
-};
-
-// Show the hints
 document.querySelector("#hints-button").onclick = function (event) {
     event.preventDefault();
-    text = removeAdviceReferences(textbox.value);
+    let text = removeAdviceReferences(getText());
+    if (text !== getText()) {
+        setText(text);
+    }
     const matches = getAdviceMatches(text);
+    currentAdviceMatches = matches;
     updateAdvicebox(getAdviceHtml(matches));
-    textbox.value = addAdviceReferences(text, matches);
+    editorView.dispatch({
+        effects: setAdviceMarks.of(buildAdviceDecorations(matches)),
+    });
 };
 
 document.querySelector("#features-button").onclick = function (event) {
@@ -163,14 +347,14 @@ document.querySelector("#features-button").onclick = function (event) {
     updateAdvicebox(getFeaturesHtml());
 };
 
-var fontSizeInput = document.querySelector('#font-size-input');
-var FONT_SIZE_MIN = 8;
-var FONT_SIZE_MAX = 72;
-var FONT_SIZE_STEP = 1;
-var FONT_SIZE_DEFAULT = 16;
+const fontSizeInput = document.querySelector('#font-size-input');
+const FONT_SIZE_MIN = 8;
+const FONT_SIZE_MAX = 72;
+const FONT_SIZE_STEP = 1;
+const FONT_SIZE_DEFAULT = 16;
 
 function setFontSize(sizePx) {
-    var size = Math.min(FONT_SIZE_MAX, Math.max(FONT_SIZE_MIN, Math.round(Number(sizePx))));
+    let size = Math.min(FONT_SIZE_MAX, Math.max(FONT_SIZE_MIN, Math.round(Number(sizePx))));
     if (Number.isNaN(size)) size = FONT_SIZE_DEFAULT;
     document.documentElement.style.setProperty('--editor-font-size', size + 'px');
     fontSizeInput.value = String(size);
@@ -193,37 +377,26 @@ fontSizeInput.onchange = function () {
     setFontSize(this.value);
 };
 
-function calcScore() {
-    let text = textbox.value;
-    var score = 0;
-    for (const rule of rules) {
-        const matches = text.match(new RegExp(rule.followed, 'ig'));
-        if (matches) score += matches.length * rule.points;
-    }
-    document.querySelector('#score').textContent = score;
-}
-
-// Save textarea contents as a text file
 document.querySelector('#download a').onclick = function () {
     this.download = (filenameBox.value || filenameBox.placeholder).replace(/^([^.]*)$/, "$1.txt");
-    this.href = URL.createObjectURL(new Blob([document.querySelector('#textbox').value], { type: 'text/plain' }));
+    this.href = URL.createObjectURL(new Blob([getText()], { type: 'text/plain' }));
 };
 
-// Load contents from a text file
 document.querySelector('#open a').onclick = function () {
     document.querySelector('#open input').click();
 };
 document.querySelector('#open input').onchange = function () {
-    var reader = new FileReader();
-    reader.file = this.files[0]; // Custom property so the filenameBox can be set from within reader.onload()
+    const reader = new FileReader();
+    reader.file = this.files[0];
     reader.onload = function () {
         filenameBox.value = this.file.name;
-        textbox.value = this.result; // this = FileReader object
+        setText(this.result);
+        clearAdviceMarks();
+        calcScore();
     };
-    reader.readAsText(this.files[0]); // this = input element
+    reader.readAsText(this.files[0]);
 };
 
-// Keyboard shortcuts for the save and load functions (`Ctrl+S`, `Ctrl+O`)
 document.onkeydown = function (event) {
     if (event.ctrlKey) {
         if (event.key === "s") {
@@ -235,9 +408,8 @@ document.onkeydown = function (event) {
             event.preventDefault();
         }
     }
-}
+};
 
-// Show the about dialog
 document.querySelector("#about-icon").onclick = function (event) {
     event.preventDefault();
     document.querySelector("#about").showModal();

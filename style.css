@@ -226,20 +226,82 @@ body {
   width: 100%;
   max-width: 48rem;
   margin: 0 auto;
-  padding: var(--space-lg) var(--space-xl);
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+#textbox .cm-editor {
+  flex: 1;
+  width: 100%;
   font-family: var(--font-sans);
   font-size: var(--editor-font-size);
   line-height: 1.55;
   color: var(--color-ink);
   background: transparent;
-  border: none;
   outline: none;
-  resize: none;
-  overflow-y: auto;
 }
 
-#textbox::placeholder {
-  color: var(--color-ink-faint);
+#textbox .cm-scroller {
+  overflow: auto;
+  font-family: inherit;
+}
+
+#textbox .cm-content {
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+}
+
+.cm-advice-mark {
+  text-decoration: underline wavy #b54a4a;
+  text-underline-offset: 2px;
+  cursor: pointer;
+}
+
+.cm-advice-tooltip {
+  max-width: 20rem;
+  padding: var(--space-sm) var(--space-md);
+  font-family: var(--font-sans);
+  font-size: 0.875rem;
+  line-height: 1.45;
+  color: var(--color-ink);
+  background: var(--color-paper);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: 0 4px 16px rgba(42, 47, 42, 0.12);
+}
+
+.cm-advice-tooltip strong {
+  display: block;
+  margin-bottom: var(--space-xs);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-sage-dark);
+}
+
+.cm-advice-tooltip p {
+  margin: 0;
+  color: var(--color-ink-muted);
+}
+
+.advice-item.advice-focused {
+  background: var(--color-sage-light);
+  border-radius: var(--radius-md);
+  padding: var(--space-sm) var(--space-md);
+  margin-left: calc(-1 * var(--space-md));
+  margin-right: calc(-1 * var(--space-md));
+  transition: background-color 0.25s ease;
+}
+
+.advice-item[data-advice-index] {
+  cursor: pointer;
+}
+
+.advice-item[data-advice-index] .show-more {
+  cursor: pointer;
 }
 
 #advicebox {
@@ -589,7 +651,7 @@ ol.advice-list .advice-item {
     flex: 0 0 45%;
   }
 
-  #textbox,
+  #textbox .cm-content,
   #advicebox {
     padding: var(--space-md);
   }
@@ -628,6 +690,10 @@ ol.advice-list .advice-item {
 
   #textbox {
     max-width: none;
+    height: auto;
+  }
+
+  #textbox .cm-editor {
     height: auto;
   }
 }

@@ -129,3 +129,5 @@ const rules = [{
         showMore: "A percentage is always 'X out of Y.' Bare percentages invite base-rate and comparison errors — e.g. '95% accurate' hides whether that means 95% of sick people or 95% of positive tests. Name Y: <b>5% of healthy people</b>, <b>95 out of 100 with cancer</b>, <b>from 4% to 2%</b>, <b>2 percentage points</b>, or <b>50% relative to last year</b>. Progress and rank phrases like <b>50% done</b> or <b>top 10%</b> are fine as written."
     },
 ];
+
+window.rules = rules;

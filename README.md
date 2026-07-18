@@ -2,7 +2,7 @@
 
 A browser-based plain text editor that checks your writing against [Claritish](https://www.reddit.com/r/ClarityLanguage/comments/14zzywg/introducing_claritish_modified_english_for/) — a modified form of English for journaling meant to foster clearer thought, compassion, and critical thinking.
 
-Type in the text area, then click **Analyze** to see suggestions for places where Claritish conventions could be applied. Your text is auto-saved in the browser; use **open** / **download** (or `Ctrl+O` / `Ctrl+S`) to work with files on disk.
+Type in the text area, then click **Analyze** to see suggestions for places where Claritish conventions could be applied. Matches are underlined in the editor; hover for a quick tip or click to jump to the full advice. Your text is auto-saved in the browser; use **open** / **download** (or `Ctrl+O` / `Ctrl+S`) to work with files on disk.
 
 ## Criterion for Features
 
@@ -20,7 +20,9 @@ The goal of r/claritylanguage is to help foster compassion, rationality, and emp
 
 ## Running locally
 
-Open `index.xhtml` in a browser. No build step required.
+Open `index.xhtml` in a browser. No build step required for normal use.
+
+The editor bundles [CodeMirror 6](https://codemirror.net/) into `editor.bundle.js`. After changing `script.js`, rebuild with `npm install && npm run build`.
 
 To lint the HTML: `npm install && npm run lint`
 
