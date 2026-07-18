@@ -2,9 +2,11 @@
   "name": "claritish-editor",
   "private": true,
   "scripts": {
-    "lint": "htmlhint --config htmlhint.conf index.xhtml"
+    "lint": "htmlhint --config htmlhint.conf index.xhtml",
+    "generate:valence": "node scripts/generate-valence-words.mjs"
   },
   "devDependencies": {
+    "afinn-165": "^2.0.2",
     "htmlhint": "^1.1.4"
   }
 }
