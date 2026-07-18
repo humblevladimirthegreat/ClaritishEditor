@@ -1,4 +1,5 @@
 var textbox = document.querySelector('#textbox');
+var advicebox = document.querySelector('#advicebox');
 var timeoutID = null;
 var filenameBox = document.querySelector('#filename');
 
@@ -130,6 +131,40 @@ document.querySelector("#hints-button").onclick = function () {
     const matches = getAdviceMatches(text);
     advicebox.innerHTML = getAdviceHtml(matches);
     textbox.value = addAdviceReferences(text, matches);
+};
+
+document.querySelector("#features-button").onclick = function () {
+    advicebox.innerHTML = "<ul>" + rules.map(r => `<li>${r.showMore}</li>`).join("") + "</ul>";
+};
+
+var fontSizeInput = document.querySelector('#font-size-input');
+var FONT_SIZE_MIN = 8;
+var FONT_SIZE_MAX = 72;
+var FONT_SIZE_STEP = 1;
+var FONT_SIZE_DEFAULT = 16;
+
+function setFontSize(sizePx) {
+    var size = Math.min(FONT_SIZE_MAX, Math.max(FONT_SIZE_MIN, Math.round(Number(sizePx))));
+    if (Number.isNaN(size)) size = FONT_SIZE_DEFAULT;
+    document.documentElement.style.setProperty('--editor-font-size', size + 'px');
+    fontSizeInput.value = String(size);
+    localStorage.setItem('fontSize', String(size));
+}
+
+setFontSize(localStorage.getItem('fontSize') || FONT_SIZE_DEFAULT);
+
+document.querySelector('#font-decrease').onclick = function (event) {
+    event.preventDefault();
+    setFontSize(Number(fontSizeInput.value) - FONT_SIZE_STEP);
+};
+
+document.querySelector('#font-increase').onclick = function (event) {
+    event.preventDefault();
+    setFontSize(Number(fontSizeInput.value) + FONT_SIZE_STEP);
+};
+
+fontSizeInput.onchange = function () {
+    setFontSize(this.value);
 };
 
 function calcScore() {

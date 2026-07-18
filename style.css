@@ -6,11 +6,14 @@ textarea {
   border: none; outline: none; resize: none;
   font-family: monospace;
 }
+:root {
+  --editor-font-size: 16px;
+}
 #textbox {
   background-color: transparent;
   width: calc(100% - 2rem);
   height: calc(30% - 1rem); 
-  font-size: 1.5vh;
+  font-size: var(--editor-font-size);
   padding: 0.5em;
   overflow-y: scroll;
 }
@@ -22,11 +25,19 @@ textarea {
   height: calc(65% - 1rem);
   position: absolute;
   top: calc(35% + 1rem);
-  font-size: 1.5vh;
+  font-size: var(--editor-font-size);
 }
-#hints-button-div{
+#hints-button-div {
   top: calc(30% + 1rem);
   position: absolute;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+#hints-button,
+#features-button,
+#font-decrease,
+#font-increase {
   font-size: 3vh;
   padding: 5px;
   background-color: #4CAF50;
@@ -37,8 +48,19 @@ textarea {
   cursor: pointer;
   transition: background-color 0.3s ease;
 }
-#hints-button-div:hover {
+#hints-button:hover,
+#features-button:hover,
+#font-decrease:hover,
+#font-increase:hover {
   background-color: #45a049;
+}
+#font-size-input {
+  width: 3.5em;
+  font-size: 16px;
+  padding: 5px;
+  border: 1px solid #4CAF50;
+  border-radius: 4px;
+  box-sizing: border-box;
 }
 .show-more {
   color: blue;

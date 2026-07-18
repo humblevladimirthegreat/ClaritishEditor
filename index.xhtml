@@ -10,7 +10,13 @@
 </head>
 <body>
   <textarea id="textbox" autofocus="autofocus" placeholder="type here" spellcheck="false"></textarea>
-  <div id="hints-button-div"><a href="#" title="Show Hints" id="hints-button">Analyze</a></div>
+  <div id="hints-button-div">
+    <a href="#" title="Show Hints" id="hints-button">Analyze</a>
+    <a href="#" title="Show Features" id="features-button">Show Features</a>
+    <a href="#" title="Decrease font size" id="font-decrease">A−</a>
+    <input type="number" id="font-size-input" title="Font size (px)" min="8" max="72" step="1" value="16" />
+    <a href="#" title="Increase font size" id="font-increase">A+</a>
+  </div>
   <div id="advicebox">In the textbox above, type a few sentences about something that's been bothering you. Then click the Analyze button.</div>
   <nav>
     <span id="version">
