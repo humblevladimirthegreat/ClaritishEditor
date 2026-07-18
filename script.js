@@ -23,6 +23,12 @@ if(!daysVisited.includes(dateString)) {
 }
 document.querySelector('#days').textContent = daysVisited.length;
 
+document.querySelector('#updated').textContent = new Date(document.lastModified)
+    .toLocaleString(undefined, {
+        year: 'numeric', month: 'short', day: 'numeric',
+        hour: 'numeric', minute: '2-digit'
+    });
+
 // Set the filename placeholder to have the date
 filenameBox.placeholder = "claritish_" + dateString + ".txt";
 
