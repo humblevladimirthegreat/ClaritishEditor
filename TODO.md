@@ -1,14 +1,9 @@
 GRAMMAR:
--All words are morally neutral, judgments only expressible through personal/societal/other values being met/unmet with impact reversibility (temporary, trivial, effortful, hard, irreversible)
--noting: label what stands out most (e.g., seeing, hearing, feeling (body sensations), smelling, tasting, thinking).
+
 
 Values:
 -values have number for priority (need not be exact but helps prevent claiming everything is top priority)
--emotions (especially negative) relate to values
--Values must be a single word, not necessarily SDT
--values should be applied only to modality, maybe habitual case, emotionally charged?
--bring back intention, current state?
--modality applies values
+-judgments have impact reversibility (temporary, trivial, effortful, hard, irreversible)
 
 Causation/Belief:
 -subject is evidence?

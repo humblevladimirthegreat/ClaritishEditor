@@ -3,12 +3,28 @@ const NEG_D = "\\-[a-z]\\b"
 const VALUE = `(?:${POS_D}|${NEG_D})`
 const VALUE_WORDS = "[autonomy, competence, relatedness, pleasure, unspecified]"
 
+// Mindfulness noting: l/h/f/s/t/m glued after sentence-ending punctuation
+const NOTE_LETTERS = "[lhfstm]"
+const NOTE_SENSES = "looking, hearing, feeling, smelling, tasting, minding"
+const ABBREV = String.raw`(?:Mr|Mrs|Ms|Dr|Prof|Jr|Sr|vs|etc|Inc|Ltd|St|Vol|Fig|approx|Jan|Feb|Mar|Apr|Jun|Jul|Aug|Sep|Sept|Oct|Nov|Dec)`
+// Terminator only when optional noting letter is then whitespace/end (skips decimals, ellipsis, abbrevs, .txt)
+const SENT_END = String.raw`(?:(?<!\d)(?<!\.)(?<!${ABBREV})(?<!\b[aeip])(?<!\b[gm])\.(?!\d|\.)|[?!])(?=${NOTE_LETTERS}?(?:\s|$))`
+const NOTE_VIOLATION = `${SENT_END}(?!${NOTE_LETTERS}(?:\\s|$))`
+const NOTE_FOLLOWED = `${SENT_END}${NOTE_LETTERS}(?=\\s|$)`
+
 // Flag N% / N percent unless reference class or change framing is explicit (see rules)
 const BARE_PERCENT_REGEX = String.raw`(?<!(?:from|to|top|bottom)\s)\b\d+(?:\.\d+)?(?:%|\s+percent\b)(?!\s*(?:of\b|relative\s+to\b|(?:complete|done|finished|full)\b))`
 const FOLLOWED_PERCENT_REGEX = String.raw`(?:\b\d+(?:\.\d+)?(?:%|\s+percent)\s+of\b|\b\d+(?:\.\d+)?\s+percentage points\b|\b\d+(?:\.\d+)?(?:%|\s+percent)\s+relative\s+to\b|\bfrom\s+\d+(?:\.\d+)?(?:%|\s+percent)\s+to\s+\d+(?:\.\d+)?(?:%|\s+percent)\b|(?:top|bottom)\s+\d+(?:\.\d+)?(?:%|\s+percent)\b|\b\d+(?:\.\d+)?(?:%|\s+percent)\s+(?:complete|done|finished|full)\b)`
 
 // Claritish rules: violation regex, followed regex, and points per followed match
 const rules = [{
+        // mindfulness noting after sentence-ending punctuation
+        violation: NOTE_VIOLATION,
+        followed: NOTE_FOLLOWED,
+        points: 1,
+        description: `Append a noting letter after <b>{match}</b> (l/h/f/s/t/m for ${NOTE_SENSES}) for what stands out most.`,
+        showMore: `Mindfulness noting labels the sense or mental mode that stands out most in the sentence — <b>l</b>ooking, <b>h</b>earing, <b>f</b>eeling, <b>s</b>melling, <b>t</b>asting, or <b>m</b>inding. Glue the letter to the sentence end: <b>I saw the tree sway.l Birds called nearby.h I felt cold.f</b> Only complete sentences with <b>.</b> <b>?</b> or <b>!</b> need a note; pick one letter for whatever is most salient, not every modality.`
+    }, {
         // first-person personal pronoun not followed by value
         violation: `\\b((?<![-+])my)\\b(?!${VALUE})`,
         followed: `\\bmy${VALUE}`,
