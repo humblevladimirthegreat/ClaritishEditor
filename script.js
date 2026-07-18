@@ -2,7 +2,6 @@ import { EditorState, StateEffect, StateField } from "@codemirror/state";
 import {
     EditorView,
     Decoration,
-    hoverTooltip,
     placeholder,
     showTooltip,
 } from "@codemirror/view";
@@ -48,6 +47,13 @@ const adviceTooltipField = StateField.define({
             }
         }
         if (tr.docChanged) return null;
+        if (tr.selection) {
+            const index = getAdviceIndexAt(tr.newSelection.main.head);
+            if (index === null) return null;
+            const next = createAdviceTooltip(index);
+            if (value && next && value.pos === next.pos && value.end === next.end) return value;
+            return next;
+        }
         return value;
     },
     provide: (field) => showTooltip.from(field),
@@ -137,12 +143,6 @@ function getAdviceIndexAt(pos) {
     return null;
 }
 
-function stripHtml(html) {
-    const el = document.createElement('div');
-    el.innerHTML = html;
-    return el.textContent || '';
-}
-
 function createAdviceTooltip(index) {
     const match = currentAdviceMatches[index];
     if (!match) return null;
@@ -165,12 +165,6 @@ function createAdviceTooltip(index) {
             return { dom };
         },
     };
-}
-
-function showStickyAdviceTooltip(index) {
-    editorView.dispatch({
-        effects: setAdviceTooltip.of(createAdviceTooltip(index)),
-    });
 }
 
 function getFeaturesHtml() {
@@ -206,29 +200,6 @@ function escapeHtml(unsafeText) {
         .replace(/"/g, "&quot;")
         .replace(/'/g, "&#039;");
 }
-
-const adviceHoverTooltip = hoverTooltip((view, pos) => {
-    const index = getAdviceIndexAt(pos);
-    if (index === null) return null;
-    const match = currentAdviceMatches[index];
-    const from = match[0];
-    const to = from + match[1].length;
-    return {
-        pos: from,
-        end: to,
-        above: true,
-        create() {
-            const dom = document.createElement('div');
-            dom.className = 'cm-advice-tooltip';
-            const title = document.createElement('strong');
-            title.textContent = match[4];
-            const summary = document.createElement('p');
-            summary.textContent = stripHtml(match[2]);
-            dom.append(title, summary);
-            return { dom };
-        },
-    };
-});
 
 const editorTheme = EditorView.theme({
     "&": {
@@ -273,19 +244,8 @@ const editorExtensions = [
     placeholder("Write here…"),
     adviceMarksField,
     adviceTooltipField,
-    adviceHoverTooltip,
     editorTheme,
     EditorView.updateListener.of(onEditorUpdate),
-    EditorView.domEventHandlers({
-        click(event, view) {
-            const pos = view.posAtCoords({ x: event.clientX, y: event.clientY });
-            if (pos == null) return false;
-            const index = getAdviceIndexAt(pos);
-            if (index === null) return false;
-            showStickyAdviceTooltip(index);
-            return false;
-        },
-    }),
 ];
 
 editorView = new EditorView({
@@ -319,15 +279,6 @@ document.querySelector('#updated').textContent = new Date(document.lastModified)
     });
 
 filenameBox.placeholder = "claritish_" + dateString + ".txt";
-
-document.addEventListener('mousedown', function (event) {
-    const tooltip = document.querySelector('.cm-advice-tooltip-detail');
-    if (!tooltip) return;
-    if (tooltip.contains(event.target)) return;
-    const pos = editorView.posAtCoords({ x: event.clientX, y: event.clientY });
-    if (pos != null && getAdviceIndexAt(pos) !== null) return;
-    clearStickyTooltip();
-});
 
 document.querySelector("#hints-button").onclick = function (event) {
     event.preventDefault();

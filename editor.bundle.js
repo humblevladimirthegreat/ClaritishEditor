@@ -13027,303 +13027,6 @@
   var showTooltip = /* @__PURE__ */ Facet.define({
     enables: [tooltipPlugin, baseTheme]
   });
-  var showHoverTooltip = /* @__PURE__ */ Facet.define({
-    combine: (inputs) => inputs.reduce((a, i) => a.concat(i), [])
-  });
-  var HoverTooltipHost = class _HoverTooltipHost {
-    // Needs to be static so that host tooltip instances always match
-    static create(view) {
-      return new _HoverTooltipHost(view);
-    }
-    constructor(view) {
-      this.view = view;
-      this.mounted = false;
-      this.dom = document.createElement("div");
-      this.dom.classList.add("cm-tooltip-hover");
-      this.manager = new TooltipViewManager(view, showHoverTooltip, (t2, p) => this.createHostedView(t2, p), (t2) => t2.dom.remove());
-    }
-    createHostedView(tooltip, prev) {
-      let hostedView = tooltip.create(this.view);
-      hostedView.dom.classList.add("cm-tooltip-section");
-      this.dom.insertBefore(hostedView.dom, prev ? prev.dom.nextSibling : this.dom.firstChild);
-      if (this.mounted && hostedView.mount)
-        hostedView.mount(this.view);
-      return hostedView;
-    }
-    mount(view) {
-      for (let hostedView of this.manager.tooltipViews) {
-        if (hostedView.mount)
-          hostedView.mount(view);
-      }
-      this.mounted = true;
-    }
-    positioned(space) {
-      for (let hostedView of this.manager.tooltipViews) {
-        if (hostedView.positioned)
-          hostedView.positioned(space);
-      }
-    }
-    update(update) {
-      this.manager.update(update);
-    }
-    destroy() {
-      var _a2;
-      for (let t2 of this.manager.tooltipViews)
-        (_a2 = t2.destroy) === null || _a2 === void 0 ? void 0 : _a2.call(t2);
-    }
-    passProp(name2) {
-      let value = void 0;
-      for (let view of this.manager.tooltipViews) {
-        let given = view[name2];
-        if (given !== void 0) {
-          if (value === void 0)
-            value = given;
-          else if (value !== given)
-            return void 0;
-        }
-      }
-      return value;
-    }
-    get offset() {
-      return this.passProp("offset");
-    }
-    get getCoords() {
-      return this.passProp("getCoords");
-    }
-    get overlap() {
-      return this.passProp("overlap");
-    }
-    get resize() {
-      return this.passProp("resize");
-    }
-  };
-  var showHoverTooltipHost = /* @__PURE__ */ showTooltip.compute([showHoverTooltip], (state) => {
-    let tooltips = state.facet(showHoverTooltip);
-    if (tooltips.length === 0)
-      return null;
-    return {
-      pos: Math.min(...tooltips.map((t2) => t2.pos)),
-      end: Math.max(...tooltips.map((t2) => {
-        var _a2;
-        return (_a2 = t2.end) !== null && _a2 !== void 0 ? _a2 : t2.pos;
-      })),
-      create: HoverTooltipHost.create,
-      above: tooltips[0].above,
-      arrow: tooltips.some((t2) => t2.arrow)
-    };
-  });
-  var hoverPlugin = /* @__PURE__ */ Facet.define();
-  var HoverPlugin = class {
-    constructor(view, source, field, locked, setHover, hoverTime) {
-      this.view = view;
-      this.source = source;
-      this.field = field;
-      this.locked = locked;
-      this.setHover = setHover;
-      this.hoverTime = hoverTime;
-      this.hoverTimeout = -1;
-      this.restartTimeout = -1;
-      this.pending = null;
-      this.lastMove = { x: 0, y: 0, target: view.dom, time: 0 };
-      this.checkHover = this.checkHover.bind(this);
-      view.dom.addEventListener("mouseleave", this.mouseleave = this.mouseleave.bind(this));
-      view.dom.addEventListener("mousemove", this.mousemove = this.mousemove.bind(this));
-    }
-    update(update) {
-      if (this.pending) {
-        this.pending = null;
-        clearTimeout(this.restartTimeout);
-        this.restartTimeout = setTimeout(() => this.startHover(), 20);
-      }
-    }
-    get active() {
-      return this.view.state.field(this.field);
-    }
-    checkHover() {
-      this.hoverTimeout = -1;
-      if (this.active.length)
-        return;
-      let hovered = Date.now() - this.lastMove.time;
-      if (hovered < this.hoverTime)
-        this.hoverTimeout = setTimeout(this.checkHover, this.hoverTime - hovered);
-      else
-        this.startHover();
-    }
-    startHover() {
-      clearTimeout(this.restartTimeout);
-      let { view, lastMove } = this;
-      let tile = view.docView.tile.nearest(lastMove.target);
-      if (!tile)
-        return;
-      let pos, side = 1;
-      if (tile.isWidget()) {
-        pos = tile.posAtStart;
-      } else {
-        pos = view.posAtCoords(lastMove);
-        if (pos == null)
-          return;
-        let posCoords = view.coordsAtPos(pos);
-        if (!posCoords || lastMove.y < posCoords.top || lastMove.y > posCoords.bottom || lastMove.x < posCoords.left - view.defaultCharacterWidth || lastMove.x > posCoords.right + view.defaultCharacterWidth)
-          return;
-        let bidi = view.bidiSpans(view.state.doc.lineAt(pos)).find((s) => s.from <= pos && s.to >= pos);
-        let rtl = bidi && bidi.dir == Direction.RTL ? -1 : 1;
-        side = lastMove.x < posCoords.left ? -rtl : rtl;
-      }
-      this.activateHover(view, pos, side);
-    }
-    activateHover(view, pos, side, locked) {
-      let open = this.source(view, pos, side);
-      let done = (value) => {
-        if (value && !(Array.isArray(value) && !value.length)) {
-          let tooltips = Array.isArray(value) ? value : [value];
-          if (locked)
-            this.locked.set(tooltips, locked);
-          view.dispatch({ effects: this.setHover.of(tooltips) });
-        }
-      };
-      if (open && "then" in open) {
-        let pending = this.pending = { pos };
-        open.then((result) => {
-          if (this.pending == pending) {
-            this.pending = null;
-            done(result);
-          }
-        }, (e) => logException(view.state, e, "hover tooltip"));
-      } else {
-        done(open);
-      }
-    }
-    get tooltip() {
-      let plugin = this.view.plugin(tooltipPlugin);
-      let index = plugin ? plugin.manager.tooltips.findIndex((t2) => t2.create == HoverTooltipHost.create) : -1;
-      return index > -1 ? plugin.manager.tooltipViews[index] : null;
-    }
-    mousemove(event) {
-      var _a2, _b;
-      this.lastMove = { x: event.clientX, y: event.clientY, target: event.target, time: Date.now() };
-      if (this.hoverTimeout < 0)
-        this.hoverTimeout = setTimeout(this.checkHover, this.hoverTime);
-      let { active, tooltip } = this;
-      if (active.length && !this.locked.has(active) && tooltip && !isInTooltip(tooltip.dom, event) || this.pending) {
-        let { pos } = active[0] || this.pending, end = (_b = (_a2 = active[0]) === null || _a2 === void 0 ? void 0 : _a2.end) !== null && _b !== void 0 ? _b : pos;
-        if (pos == end ? this.view.posAtCoords(this.lastMove) != pos : !isOverRange(this.view, pos, end, event.clientX, event.clientY)) {
-          this.view.dispatch({ effects: this.setHover.of([]) });
-          this.pending = null;
-        }
-      }
-    }
-    mouseleave(event) {
-      clearTimeout(this.hoverTimeout);
-      this.hoverTimeout = -1;
-      let { active } = this;
-      if (active.length && !this.locked.has(active)) {
-        let { tooltip } = this;
-        let inTooltip = tooltip && tooltip.dom.contains(event.relatedTarget);
-        if (!inTooltip)
-          this.view.dispatch({ effects: this.setHover.of([]) });
-        else
-          this.watchTooltipLeave(tooltip.dom);
-      }
-    }
-    watchTooltipLeave(tooltip) {
-      let watch = (event) => {
-        tooltip.removeEventListener("mouseleave", watch);
-        let { active } = this;
-        if (active.length && !this.locked.has(active) && !this.view.dom.contains(event.relatedTarget))
-          this.view.dispatch({ effects: this.setHover.of([]) });
-      };
-      tooltip.addEventListener("mouseleave", watch);
-    }
-    destroy() {
-      clearTimeout(this.hoverTimeout);
-      clearTimeout(this.restartTimeout);
-      this.view.dom.removeEventListener("mouseleave", this.mouseleave);
-      this.view.dom.removeEventListener("mousemove", this.mousemove);
-    }
-  };
-  var tooltipMargin = 4;
-  function isInTooltip(tooltip, event) {
-    let { left, right, top: top2, bottom } = tooltip.getBoundingClientRect(), arrow;
-    if (arrow = tooltip.querySelector(".cm-tooltip-arrow")) {
-      let arrowRect = arrow.getBoundingClientRect();
-      top2 = Math.min(arrowRect.top, top2);
-      bottom = Math.max(arrowRect.bottom, bottom);
-    }
-    return event.clientX >= left - tooltipMargin && event.clientX <= right + tooltipMargin && event.clientY >= top2 - tooltipMargin && event.clientY <= bottom + tooltipMargin;
-  }
-  function isOverRange(view, from, to, x, y, margin) {
-    let rect = view.scrollDOM.getBoundingClientRect();
-    let docBottom = view.documentTop + view.documentPadding.top + view.contentHeight;
-    if (rect.left > x || rect.right < x || rect.top > y || Math.min(rect.bottom, docBottom) < y)
-      return false;
-    let pos = view.posAtCoords({ x, y }, false);
-    return pos >= from && pos <= to;
-  }
-  function hoverTooltip(source, options = {}) {
-    let setHover = StateEffect.define();
-    let locked = /* @__PURE__ */ new WeakMap();
-    let hoverState = StateField.define({
-      create() {
-        return [];
-      },
-      update(value, tr) {
-        let lock = locked.get(value);
-        if (value.length) {
-          if (options.hideOnChange && (tr.docChanged || tr.selection))
-            value = [];
-          else if (lock && lock(tr))
-            value = [];
-          else if (options.hideOn)
-            value = value.filter((v) => !options.hideOn(tr, v));
-        }
-        if (tr.docChanged && value.length) {
-          let mapped = [];
-          for (let tooltip of value) {
-            let newPos = tr.changes.mapPos(tooltip.pos, -1, MapMode.TrackDel);
-            if (newPos != null) {
-              let copy = Object.assign(/* @__PURE__ */ Object.create(null), tooltip);
-              copy.pos = newPos;
-              if (copy.end != null)
-                copy.end = tr.changes.mapPos(copy.end);
-              mapped.push(copy);
-            }
-          }
-          value = mapped;
-        }
-        for (let effect of tr.effects) {
-          if (effect.is(setHover)) {
-            value = effect.value;
-            lock = void 0;
-          }
-          if (effect.is(closeHoverTooltipEffect) && !effect.value || effect.value == hoverState)
-            value = [];
-        }
-        if (value.length && lock)
-          locked.set(value, lock);
-        return value;
-      },
-      provide: (f) => showHoverTooltip.from(f)
-    });
-    const plugin = ViewPlugin.define((view) => new HoverPlugin(
-      view,
-      source,
-      hoverState,
-      locked,
-      setHover,
-      options.hoverTime || 300
-      /* Hover.Time */
-    ));
-    return {
-      active: hoverState,
-      extension: [
-        hoverState,
-        plugin,
-        hoverPlugin.of(plugin),
-        showHoverTooltipHost
-      ]
-    };
-  }
-  var closeHoverTooltipEffect = /* @__PURE__ */ StateEffect.define();
   var GutterMarker = class extends RangeValue {
     /**
     @internal
@@ -17889,6 +17592,13 @@
         }
       }
       if (tr.docChanged) return null;
+      if (tr.selection) {
+        const index = getAdviceIndexAt(tr.newSelection.main.head);
+        if (index === null) return null;
+        const next = createAdviceTooltip(index);
+        if (value && next && value.pos === next.pos && value.end === next.end) return value;
+        return next;
+      }
       return value;
     },
     provide: (field) => showTooltip.from(field)
@@ -17966,11 +17676,6 @@
     }
     return null;
   }
-  function stripHtml(html) {
-    const el = document.createElement("div");
-    el.innerHTML = html;
-    return el.textContent || "";
-  }
   function createAdviceTooltip(index) {
     const match = currentAdviceMatches[index];
     if (!match) return null;
@@ -17993,11 +17698,6 @@
         return { dom };
       }
     };
-  }
-  function showStickyAdviceTooltip(index) {
-    editorView.dispatch({
-      effects: setAdviceTooltip.of(createAdviceTooltip(index))
-    });
   }
   function getFeaturesHtml() {
     let html = '<ul class="features-list">';
@@ -18025,28 +17725,6 @@
   function escapeHtml(unsafeText) {
     return unsafeText.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
   }
-  var adviceHoverTooltip = hoverTooltip((view, pos) => {
-    const index = getAdviceIndexAt(pos);
-    if (index === null) return null;
-    const match = currentAdviceMatches[index];
-    const from = match[0];
-    const to = from + match[1].length;
-    return {
-      pos: from,
-      end: to,
-      above: true,
-      create() {
-        const dom = document.createElement("div");
-        dom.className = "cm-advice-tooltip";
-        const title = document.createElement("strong");
-        title.textContent = match[4];
-        const summary = document.createElement("p");
-        summary.textContent = stripHtml(match[2]);
-        dom.append(title, summary);
-        return { dom };
-      }
-    };
-  });
   var editorTheme = EditorView.theme({
     "&": {
       height: "100%",
@@ -18088,19 +17766,8 @@
     placeholder("Write here\u2026"),
     adviceMarksField,
     adviceTooltipField,
-    adviceHoverTooltip,
     editorTheme,
-    EditorView.updateListener.of(onEditorUpdate),
-    EditorView.domEventHandlers({
-      click(event, view) {
-        const pos = view.posAtCoords({ x: event.clientX, y: event.clientY });
-        if (pos == null) return false;
-        const index = getAdviceIndexAt(pos);
-        if (index === null) return false;
-        showStickyAdviceTooltip(index);
-        return false;
-      }
-    })
+    EditorView.updateListener.of(onEditorUpdate)
   ];
   editorView = new EditorView({
     state: EditorState.create({
@@ -18130,14 +17797,6 @@
     minute: "2-digit"
   });
   filenameBox.placeholder = "claritish_" + dateString + ".txt";
-  document.addEventListener("mousedown", function(event) {
-    const tooltip = document.querySelector(".cm-advice-tooltip-detail");
-    if (!tooltip) return;
-    if (tooltip.contains(event.target)) return;
-    const pos = editorView.posAtCoords({ x: event.clientX, y: event.clientY });
-    if (pos != null && getAdviceIndexAt(pos) !== null) return;
-    clearStickyTooltip();
-  });
   document.querySelector("#hints-button").onclick = function(event) {
     event.preventDefault();
     let text = removeAdviceReferences(getText());

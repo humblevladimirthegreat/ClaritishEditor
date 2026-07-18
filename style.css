@@ -249,7 +249,7 @@ body {
 }
 
 .cm-advice-mark {
-  text-decoration: underline wavy #b54a4a;
+  text-decoration: underline wavy var(--color-sage);
   text-underline-offset: 2px;
   cursor: pointer;
 }
@@ -275,11 +275,6 @@ body {
   letter-spacing: 0.04em;
   text-transform: uppercase;
   color: var(--color-sage-dark);
-}
-
-.cm-advice-tooltip p {
-  margin: 0;
-  color: var(--color-ink-muted);
 }
 
 .cm-advice-tooltip-detail {

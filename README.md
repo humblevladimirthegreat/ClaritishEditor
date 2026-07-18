@@ -2,7 +2,7 @@
 
 A browser-based plain text editor that checks your writing against [Claritish](https://www.reddit.com/r/ClarityLanguage/comments/14zzywg/introducing_claritish_modified_english_for/) — a modified form of English for journaling meant to foster clearer thought, compassion, and critical thinking.
 
-Type in the text area, then click **Analyze** to see suggestions for places where Claritish conventions could be applied. Matches are underlined in the editor; hover for a quick tip or click for the full explanation. Your text is auto-saved in the browser; use **open** / **download** (or `Ctrl+O` / `Ctrl+S`) to work with files on disk.
+Type in the text area, then click **Analyze** to see suggestions for places where Claritish conventions could be applied. Matches are underlined in the editor; place the caret on a match to see the explanation. Your text is auto-saved in the browser; use **open** / **download** (or `Ctrl+O` / `Ctrl+S`) to work with files on disk.
 
 ## Criterion for Features
 
