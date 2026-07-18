@@ -17854,13 +17854,15 @@
 
   // script.js
   var rules = window.rules;
-  var advicebox = document.querySelector("#advicebox");
   var editorHost = document.querySelector("#textbox");
+  var toolbar = document.querySelector("#toolbar");
   var timeoutID = { id: null };
   var filenameBox = document.querySelector("#filename");
   var editorView;
   var currentAdviceMatches = [];
+  var analyzeToastTimeout = null;
   var setAdviceMarks = StateEffect.define();
+  var setAdviceTooltip = StateEffect.define();
   var adviceMarksField = StateField.define({
     create() {
       return Decoration.none;
@@ -17876,6 +17878,21 @@
     },
     provide: (field) => EditorView.decorations.from(field)
   });
+  var adviceTooltipField = StateField.define({
+    create() {
+      return null;
+    },
+    update(value, tr) {
+      for (const effect of tr.effects) {
+        if (effect.is(setAdviceTooltip)) {
+          return effect.value;
+        }
+      }
+      if (tr.docChanged) return null;
+      return value;
+    },
+    provide: (field) => showTooltip.from(field)
+  });
   function getText() {
     return editorView.state.doc.toString();
   }
@@ -17887,7 +17904,15 @@
   }
   function clearAdviceMarks() {
     currentAdviceMatches = [];
-    editorView.dispatch({ effects: setAdviceMarks.of(Decoration.none) });
+    editorView.dispatch({
+      effects: [
+        setAdviceMarks.of(Decoration.none),
+        setAdviceTooltip.of(null)
+      ]
+    });
+  }
+  function clearStickyTooltip() {
+    editorView.dispatch({ effects: setAdviceTooltip.of(null) });
   }
   function storeLocally() {
     localStorage.setItem("browserpad", getText());
@@ -17946,47 +17971,33 @@
     el.innerHTML = html;
     return el.textContent || "";
   }
-  function focusAdviceItem(index) {
-    const item = advicebox.querySelector(`[data-advice-index="${index}"]`);
-    if (!item) return;
-    item.scrollIntoView({ behavior: "smooth", block: "nearest" });
-    item.classList.add("advice-focused");
-    window.setTimeout(() => item.classList.remove("advice-focused"), 2e3);
-  }
-  function scrollEditorToAdvice(index) {
+  function createAdviceTooltip(index) {
     const match = currentAdviceMatches[index];
-    if (!match) return;
+    if (!match) return null;
     const from = match[0];
     const to = from + match[1].length;
+    return {
+      pos: from,
+      end: to,
+      above: true,
+      arrow: true,
+      create() {
+        const dom = document.createElement("div");
+        dom.className = "cm-advice-tooltip cm-advice-tooltip-detail";
+        const title = document.createElement("strong");
+        title.textContent = match[4];
+        const detail = document.createElement("div");
+        detail.className = "cm-advice-detail";
+        detail.innerHTML = match[3];
+        dom.append(title, detail);
+        return { dom };
+      }
+    };
+  }
+  function showStickyAdviceTooltip(index) {
     editorView.dispatch({
-      selection: { anchor: from, head: to },
-      effects: EditorView.scrollIntoView(from, { y: "center" })
+      effects: setAdviceTooltip.of(createAdviceTooltip(index))
     });
-    editorView.focus();
-  }
-  function getAdviceItemHtml(index, nameHtml, summaryHtml, detailHtml) {
-    return `<li class="advice-item" data-advice-index="${index}">
-        <strong class="advice-name">${nameHtml}</strong>
-        <p class="advice-summary">${summaryHtml}</p>
-        <button type="button" class="show-more">Show more</button>
-        <div class="advice-detail" hidden="hidden">${detailHtml}</div>
-    </li>`;
-  }
-  function getAdviceHtml(adviceMatches) {
-    if (adviceMatches.length > 0) {
-      let html = '<ol class="advice-list">';
-      adviceMatches.forEach((adviceMatch, index) => {
-        html += getAdviceItemHtml(
-          index,
-          escapeHtml(adviceMatch[4]),
-          adviceMatch[2],
-          adviceMatch[3]
-        );
-      });
-      html += "</ol>";
-      return html;
-    }
-    return '<p class="advice-success">You used all the possible Claritish options!</p>';
   }
   function getFeaturesHtml() {
     let html = '<ul class="features-list">';
@@ -17996,15 +18007,20 @@
     html += "</ul>";
     return html;
   }
-  function updateAdvicebox(html) {
-    advicebox.classList.remove("advice-visible");
-    advicebox.classList.add("advice-updating");
-    advicebox.innerHTML = html;
-    advicebox.classList.remove("advice-welcome");
-    requestAnimationFrame(function() {
-      advicebox.classList.remove("advice-updating");
-      advicebox.classList.add("advice-visible");
-    });
+  function showAnalyzeToast(message) {
+    let toast = document.getElementById("analyze-toast");
+    if (!toast) {
+      toast = document.createElement("p");
+      toast.id = "analyze-toast";
+      toast.setAttribute("role", "status");
+      toolbar.after(toast);
+    }
+    toast.textContent = message;
+    toast.classList.add("analyze-toast-visible");
+    window.clearTimeout(analyzeToastTimeout);
+    analyzeToastTimeout = window.setTimeout(() => {
+      toast.classList.remove("analyze-toast-visible");
+    }, 4e3);
   }
   function escapeHtml(unsafeText) {
     return unsafeText.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
@@ -18071,6 +18087,7 @@
     EditorView.lineWrapping,
     placeholder("Write here\u2026"),
     adviceMarksField,
+    adviceTooltipField,
     adviceHoverTooltip,
     editorTheme,
     EditorView.updateListener.of(onEditorUpdate),
@@ -18080,7 +18097,7 @@
         if (pos == null) return false;
         const index = getAdviceIndexAt(pos);
         if (index === null) return false;
-        focusAdviceItem(index);
+        showStickyAdviceTooltip(index);
         return false;
       }
     })
@@ -18113,29 +18130,13 @@
     minute: "2-digit"
   });
   filenameBox.placeholder = "claritish_" + dateString + ".txt";
-  advicebox.addEventListener("click", function(event) {
-    const button = event.target.closest(".show-more");
-    if (button) {
-      const item2 = button.closest(".advice-item");
-      if (!item2) return;
-      const detail = item2.querySelector(".advice-detail");
-      if (!detail) return;
-      const isHidden = detail.hasAttribute("hidden");
-      if (isHidden) {
-        detail.removeAttribute("hidden");
-        button.textContent = "Show less";
-      } else {
-        detail.setAttribute("hidden", "hidden");
-        button.textContent = "Show more";
-      }
-      return;
-    }
-    const item = event.target.closest(".advice-item[data-advice-index]");
-    if (!item) return;
-    const index = Number(item.dataset.adviceIndex);
-    if (!Number.isNaN(index)) {
-      scrollEditorToAdvice(index);
-    }
+  document.addEventListener("mousedown", function(event) {
+    const tooltip = document.querySelector(".cm-advice-tooltip-detail");
+    if (!tooltip) return;
+    if (tooltip.contains(event.target)) return;
+    const pos = editorView.posAtCoords({ x: event.clientX, y: event.clientY });
+    if (pos != null && getAdviceIndexAt(pos) !== null) return;
+    clearStickyTooltip();
   });
   document.querySelector("#hints-button").onclick = function(event) {
     event.preventDefault();
@@ -18143,9 +18144,12 @@
     if (text !== getText()) {
       setText(text);
     }
+    clearStickyTooltip();
     const matches = getAdviceMatches(text);
     currentAdviceMatches = matches;
-    updateAdvicebox(getAdviceHtml(matches));
+    if (matches.length === 0) {
+      showAnalyzeToast("You used all the possible Claritish options!");
+    }
     editorView.dispatch({
       effects: setAdviceMarks.of(buildAdviceDecorations(matches))
     });
@@ -18200,6 +18204,9 @@
     reader.readAsText(this.files[0]);
   };
   document.onkeydown = function(event) {
+    if (event.key === "Escape") {
+      clearStickyTooltip();
+    }
     if (event.ctrlKey) {
       if (event.key === "s") {
         document.querySelector("#download a").click();
