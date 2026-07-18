@@ -2,49 +2,81 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en">
 <head>
   <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Claritish Editor</title>
   <link rel="icon" type="image/x-icon" href="data:image/x-icon;base64,R0lGODlhEAAQAKEAAAAAAICAgP///wAAACH/
     C05FVFNDQVBFMi4wAwEAAAAh/hFDcmVhdGVkIHdpdGggR0lNUAAh+QQBZAADACwAAAAAEAAQAAACJIyPacLtvp5kEUwYmL00i81VXK
     eNgjiioQdeqsuakXl6tIIjBQAh+QQBZAADACwAAAAAEAAQAAACIIyPacLtvp5kcb5qG85iZ2+BkyiRV8BBaEqtrKkqslEAADs=" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="crossorigin" />
+  <link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:ital,wght@0,400;0,500;0,600;1,400&amp;family=Source+Serif+4:ital,wght@0,400;0,600;1,400&amp;display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <textarea id="textbox" autofocus="autofocus" placeholder="type here" spellcheck="false"></textarea>
-  <div id="hints-button-div">
-    <a href="#" title="Show Hints" id="hints-button">Analyze</a>
-    <a href="#" title="Show Features" id="features-button">Show Features</a>
-    <a href="#" title="Decrease font size" id="font-decrease">A−</a>
-    <input type="number" id="font-size-input" title="Font size (px)" min="8" max="72" step="1" value="16" />
-    <a href="#" title="Increase font size" id="font-increase">A+</a>
-  </div>
-  <div id="advicebox">In the textbox above, type a few sentences about something that's been bothering you. Then click the Analyze button.</div>
-  <nav>
-    <span id="version">
-      version: <span id="updated">_</span>
-    </span>
-    <span id="stats">
-      days: <span id="days">_</span> | 
-      score: <span id="score">_</span>
-    </span>
-    <span id="controls">
-      <span id="open">
-        <input type="file" value="open" />
-        <a href="#">open</a>
+  <div id="app">
+    <header id="site-header">
+      <h1 id="brand">Claritish</h1>
+      <p id="tagline">A journaling editor for clearer, more compassionate thought.</p>
+    </header>
+
+    <div id="toolbar">
+      <div id="toolbar-primary">
+        <a href="#" title="Analyze your writing" id="hints-button" class="btn btn-primary">Analyze</a>
+        <a href="#" title="Show all Claritish features" id="features-button" class="btn btn-secondary">Show Features</a>
+      </div>
+      <div id="toolbar-font">
+        <span class="toolbar-label">Font</span>
+        <a href="#" title="Decrease font size" id="font-decrease" class="btn btn-ghost">A−</a>
+        <input type="number" id="font-size-input" title="Font size (px)" min="8" max="72" step="1" value="16" />
+        <a href="#" title="Increase font size" id="font-increase" class="btn btn-ghost">A+</a>
+      </div>
+    </div>
+
+    <main id="workspace">
+      <section id="editor-pane" aria-label="Writing area">
+        <textarea id="textbox" autofocus="autofocus" placeholder="Write here…" spellcheck="false"></textarea>
+      </section>
+      <section id="advice-pane" aria-label="Suggestions">
+        <div id="advicebox" class="advice-welcome">
+          <p class="welcome-lead">Write a few sentences about something on your mind.</p>
+          <p class="welcome-example">For example: <em>I think my coworker is upset with me because they didn't reply to my email.</em></p>
+          <p class="welcome-cta">When you're ready, click <strong>Analyze</strong> to see where Claritish conventions could help.</p>
+        </div>
+      </section>
+    </main>
+
+    <nav id="footer">
+      <span id="version">
+        version: <span id="updated">_</span>
       </span>
-      |
-      <span id="download">
-        <a href="#">download</a>
-        <input id="filename" />
-      </span> │
-      <a href="#" title="About Claritish" id="about-icon">ⓘ</a>
-    </span>
-  </nav>
+      <span id="stats">
+        streak: <span id="days">_</span>
+        <span class="stat-sep">·</span>
+        clarity score: <span id="score">_</span>
+      </span>
+      <span id="controls">
+        <span id="open">
+          <input type="file" value="open" />
+          <a href="#">open</a>
+        </span>
+        <span class="control-sep">·</span>
+        <span id="download">
+          <a href="#">download</a>
+          <input id="filename" />
+        </span>
+        <span class="control-sep">·</span>
+        <a href="#" title="About Claritish" id="about-icon">about</a>
+      </span>
+    </nav>
+  </div>
+
   <dialog id="about">
     <h2>Claritish Editor</h2>
-    <p>Notepad that checks for the Claritish language.</p>
+    <p>A browser-based editor that checks your writing against Claritish — a modified form of English for journaling meant to foster clearer thought, compassion, and critical thinking.</p>
     <p>The source code is <a href="https://github.com/humblevladimirthegreat/ClaritishEditor">available on GitHub</a>.</p>
-    <form method="dialog"><button>close</button></form>
+    <form method="dialog"><button type="submit" class="btn btn-secondary">Close</button></form>
   </dialog>
+
   <script src="valence-words.js"></script>
   <script src="rules.js"></script>
   <script src="script.js"></script>

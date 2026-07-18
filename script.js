@@ -82,39 +82,62 @@ function addAdviceReferences(text, adviceMatches) {
     return text;
 }
 
-function getShowMoreOnClick(uuid) {
-    return `var moreText = document.getElementById('moreText_${uuid}');
-        if (moreText.style.display === 'none') {
-            moreText.style.display = 'block';
-            this.innerText = 'Show Less';
-        } else {
-            moreText.style.display = 'none';
-            this.innerText = 'Show More';
-        }
-    `.replaceAll('\n','')
-}
-
-function getShowMoreHtml(hiddenHtml) {
-    uuid = Math.floor(Math.random() * 1000000000000001)
-    // creates a Show More button that when clicked displays hiddenHtml
-    html = `<span id="showMore_${uuid}" class="show-more" onclick="${getShowMoreOnClick(uuid)}">Show More</span>`
-    html += `<div id="moreText_${uuid}" style="display: none;">${hiddenHtml}</div>`
-    return html;
+function getAdviceItemHtml(summaryHtml, detailHtml) {
+    return `<li class="advice-item">
+        <p class="advice-summary">${summaryHtml}</p>
+        <button type="button" class="show-more">Show more</button>
+        <div class="advice-detail" hidden="hidden">${detailHtml}</div>
+    </li>`;
 }
 
 function getAdviceHtml(adviceMatches) {
-    var html = "<ol>"
     if (adviceMatches.length > 0) {
+        var html = '<ol class="advice-list">';
         adviceMatches.forEach(adviceMatch => {
-            // Create <li> for each match  
-            html += `<li>${adviceMatch[2]} ${getShowMoreHtml(adviceMatch[3])}</li>`;
+            html += getAdviceItemHtml(adviceMatch[2], adviceMatch[3]);
         });
-        html += "</ol>"
-    } else {
-        html = "You used all the possible Claritish options!"
+        html += '</ol>';
+        return html;
     }
+    return '<p class="advice-success">You used all the possible Claritish options!</p>';
+}
+
+function getFeaturesHtml() {
+    var html = '<ul class="features-list">';
+    rules.forEach(rule => {
+        html += `<li class="features-item">${rule.showMore}</li>`;
+    });
+    html += '</ul>';
     return html;
-};
+}
+
+function updateAdvicebox(html) {
+    advicebox.classList.remove('advice-visible');
+    advicebox.classList.add('advice-updating');
+    advicebox.innerHTML = html;
+    advicebox.classList.remove('advice-welcome');
+    requestAnimationFrame(function () {
+        advicebox.classList.remove('advice-updating');
+        advicebox.classList.add('advice-visible');
+    });
+}
+
+advicebox.addEventListener('click', function (event) {
+    var button = event.target.closest('.show-more');
+    if (!button) return;
+    var item = button.closest('.advice-item');
+    if (!item) return;
+    var detail = item.querySelector('.advice-detail');
+    if (!detail) return;
+    var isHidden = detail.hasAttribute('hidden');
+    if (isHidden) {
+        detail.removeAttribute('hidden');
+        button.textContent = 'Show less';
+    } else {
+        detail.setAttribute('hidden', 'hidden');
+        button.textContent = 'Show more';
+    }
+});
 
 function escapeHtml(unsafeText) {
     return unsafeText
@@ -126,15 +149,17 @@ function escapeHtml(unsafeText) {
 };
 
 // Show the hints
-document.querySelector("#hints-button").onclick = function () {
+document.querySelector("#hints-button").onclick = function (event) {
+    event.preventDefault();
     text = removeAdviceReferences(textbox.value);
     const matches = getAdviceMatches(text);
-    advicebox.innerHTML = getAdviceHtml(matches);
+    updateAdvicebox(getAdviceHtml(matches));
     textbox.value = addAdviceReferences(text, matches);
 };
 
-document.querySelector("#features-button").onclick = function () {
-    advicebox.innerHTML = "<ul>" + rules.map(r => `<li>${r.showMore}</li>`).join("") + "</ul>";
+document.querySelector("#features-button").onclick = function (event) {
+    event.preventDefault();
+    updateAdvicebox(getFeaturesHtml());
 };
 
 var fontSizeInput = document.querySelector('#font-size-input');
@@ -212,6 +237,7 @@ document.onkeydown = function (event) {
 }
 
 // Show the about dialog
-document.querySelector("#about-icon").onclick = function () {
+document.querySelector("#about-icon").onclick = function (event) {
+    event.preventDefault();
     document.querySelector("#about").showModal();
 };
