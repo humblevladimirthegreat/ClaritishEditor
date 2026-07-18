@@ -45,11 +45,11 @@ textbox.onkeyup = function () {
 
 function getAdviceMatches(text) {
     var adviceMatches = [];
-    advices.forEach(expr => {
-        for (const match of text.matchAll(new RegExp(expr.regex, 'ig'))) {
+    rules.forEach(rule => {
+        for (const match of text.matchAll(new RegExp(rule.violation, 'ig'))) {
             let matchedText = match[0];
-            advice = expr.advice.replaceAll("{match}", escapeHtml(matchedText || ''));
-            adviceMatches.push([match.index, matchedText, advice, expr.showMore]);
+            advice = rule.description.replaceAll("{match}", escapeHtml(matchedText || ''));
+            adviceMatches.push([match.index, matchedText, advice, rule.showMore]);
         }
     });
     // sort by index, because JS default approach to sort is apparently to coerce the arrays to string first
@@ -129,7 +129,10 @@ document.querySelector("#hints-button").onclick = function () {
 function calcScore() {
     let text = textbox.value;
     var score = 0;
-    pointFunctions.forEach(func => score += func(text))
+    for (const rule of rules) {
+        const matches = text.match(new RegExp(rule.followed, 'ig'));
+        if (matches) score += matches.length * rule.points;
+    }
     document.querySelector('#score').textContent = score;
 }
 
