@@ -342,9 +342,13 @@ document.querySelector("#hints-button").onclick = function (event) {
     });
 };
 
+const featuresDialog = document.querySelector("#features");
+const featuresBody = document.querySelector("#features-body");
+
 document.querySelector("#features-button").onclick = function (event) {
     event.preventDefault();
-    updateAdvicebox(getFeaturesHtml());
+    featuresBody.innerHTML = getFeaturesHtml();
+    featuresDialog.showModal();
 };
 
 const fontSizeInput = document.querySelector('#font-size-input');

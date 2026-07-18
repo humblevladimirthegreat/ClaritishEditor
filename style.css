@@ -573,9 +573,10 @@ ol.advice-list .advice-item {
   color: var(--color-ink-faint);
 }
 
-/* About dialog */
+/* Dialogs */
 
-#about {
+#about,
+#features {
   max-width: 28rem;
   padding: var(--space-xl);
   font-family: var(--font-sans);
@@ -586,11 +587,13 @@ ol.advice-list .advice-item {
   box-shadow: 0 8px 32px rgba(42, 47, 42, 0.12);
 }
 
-#about::backdrop {
+#about::backdrop,
+#features::backdrop {
   background: rgba(42, 47, 42, 0.35);
 }
 
-#about h2 {
+#about h2,
+#features h2 {
   margin: 0 0 var(--space-md);
   font-size: 1.35rem;
   font-weight: 600;
@@ -611,9 +614,35 @@ ol.advice-list .advice-item {
   color: var(--color-sage);
 }
 
-#about > form {
+#about > form,
+#features > form {
   margin-top: var(--space-lg);
   text-align: right;
+}
+
+#features {
+  width: min(40rem, calc(100vw - 2rem));
+  max-width: 40rem;
+  max-height: min(85vh, 40rem);
+}
+
+#features[open] {
+  display: flex;
+  flex-direction: column;
+}
+
+#features-body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  font-family: var(--font-serif);
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  color: var(--color-ink);
+}
+
+#features-body .features-list {
+  max-width: none;
 }
 
 /* Responsive */

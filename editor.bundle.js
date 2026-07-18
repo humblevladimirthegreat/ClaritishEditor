@@ -18150,9 +18150,12 @@
       effects: setAdviceMarks.of(buildAdviceDecorations(matches))
     });
   };
+  var featuresDialog = document.querySelector("#features");
+  var featuresBody = document.querySelector("#features-body");
   document.querySelector("#features-button").onclick = function(event) {
     event.preventDefault();
-    updateAdvicebox(getFeaturesHtml());
+    featuresBody.innerHTML = getFeaturesHtml();
+    featuresDialog.showModal();
   };
   var fontSizeInput = document.querySelector("#font-size-input");
   var FONT_SIZE_MIN = 8;
