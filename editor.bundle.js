@@ -17558,12 +17558,12 @@
   // script.js
   var rules = window.rules;
   var editorHost = document.querySelector("#textbox");
-  var toolbar = document.querySelector("#toolbar");
-  var timeoutID = { id: null };
+  var saveTimeoutID = { id: null };
+  var analyzeTimeoutID = { id: null };
+  var ANALYZE_IDLE_MS = 2e3;
   var filenameBox = document.querySelector("#filename");
   var editorView;
   var currentAdviceMatches = [];
-  var analyzeToastTimeout = null;
   var setAdviceMarks = StateEffect.define();
   var setAdviceTooltip = StateEffect.define();
   var adviceMarksField = StateField.define({
@@ -17639,8 +17639,10 @@
   function onEditorUpdate(update) {
     if (!update.docChanged) return;
     calcScore();
-    window.clearTimeout(timeoutID.id);
-    timeoutID.id = window.setTimeout(storeLocally, 1e3);
+    window.clearTimeout(saveTimeoutID.id);
+    saveTimeoutID.id = window.setTimeout(storeLocally, 1e3);
+    window.clearTimeout(analyzeTimeoutID.id);
+    analyzeTimeoutID.id = window.setTimeout(runAnalyze, ANALYZE_IDLE_MS);
   }
   function getAdviceMatches(text) {
     const adviceMatches = [];
@@ -17706,21 +17708,6 @@
     });
     html += "</ul>";
     return html;
-  }
-  function showAnalyzeToast(message) {
-    let toast = document.getElementById("analyze-toast");
-    if (!toast) {
-      toast = document.createElement("p");
-      toast.id = "analyze-toast";
-      toast.setAttribute("role", "status");
-      toolbar.after(toast);
-    }
-    toast.textContent = message;
-    toast.classList.add("analyze-toast-visible");
-    window.clearTimeout(analyzeToastTimeout);
-    analyzeToastTimeout = window.setTimeout(() => {
-      toast.classList.remove("analyze-toast-visible");
-    }, 4e3);
   }
   function escapeHtml(unsafeText) {
     return unsafeText.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
@@ -17797,8 +17784,7 @@
     minute: "2-digit"
   });
   filenameBox.placeholder = "claritish_" + dateString + ".txt";
-  document.querySelector("#hints-button").onclick = function(event) {
-    event.preventDefault();
+  function runAnalyze() {
     let text = removeAdviceReferences(getText());
     if (text !== getText()) {
       setText(text);
@@ -17806,13 +17792,13 @@
     clearStickyTooltip();
     const matches = getAdviceMatches(text);
     currentAdviceMatches = matches;
-    if (matches.length === 0) {
-      showAnalyzeToast("You used all the possible Claritish options!");
-    }
     editorView.dispatch({
       effects: setAdviceMarks.of(buildAdviceDecorations(matches))
     });
-  };
+  }
+  if (savedText.trim()) {
+    runAnalyze();
+  }
   var featuresDialog = document.querySelector("#features");
   var featuresBody = document.querySelector("#features-body");
   document.querySelector("#features-button").onclick = function(event) {

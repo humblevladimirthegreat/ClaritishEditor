@@ -9,13 +9,13 @@ import { minimalSetup } from "codemirror";
 
 const rules = window.rules;
 const editorHost = document.querySelector('#textbox');
-const toolbar = document.querySelector('#toolbar');
-const timeoutID = { id: null };
+const saveTimeoutID = { id: null };
+const analyzeTimeoutID = { id: null };
+const ANALYZE_IDLE_MS = 2000;
 const filenameBox = document.querySelector('#filename');
 
 let editorView;
 let currentAdviceMatches = [];
-let analyzeToastTimeout = null;
 
 const setAdviceMarks = StateEffect.define();
 const setAdviceTooltip = StateEffect.define();
@@ -101,8 +101,10 @@ function calcScore() {
 function onEditorUpdate(update) {
     if (!update.docChanged) return;
     calcScore();
-    window.clearTimeout(timeoutID.id);
-    timeoutID.id = window.setTimeout(storeLocally, 1000);
+    window.clearTimeout(saveTimeoutID.id);
+    saveTimeoutID.id = window.setTimeout(storeLocally, 1000);
+    window.clearTimeout(analyzeTimeoutID.id);
+    analyzeTimeoutID.id = window.setTimeout(runAnalyze, ANALYZE_IDLE_MS);
 }
 
 function getAdviceMatches(text) {
@@ -174,22 +176,6 @@ function getFeaturesHtml() {
     });
     html += '</ul>';
     return html;
-}
-
-function showAnalyzeToast(message) {
-    let toast = document.getElementById('analyze-toast');
-    if (!toast) {
-        toast = document.createElement('p');
-        toast.id = 'analyze-toast';
-        toast.setAttribute('role', 'status');
-        toolbar.after(toast);
-    }
-    toast.textContent = message;
-    toast.classList.add('analyze-toast-visible');
-    window.clearTimeout(analyzeToastTimeout);
-    analyzeToastTimeout = window.setTimeout(() => {
-        toast.classList.remove('analyze-toast-visible');
-    }, 4000);
 }
 
 function escapeHtml(unsafeText) {
@@ -280,8 +266,7 @@ document.querySelector('#updated').textContent = new Date(document.lastModified)
 
 filenameBox.placeholder = "claritish_" + dateString + ".txt";
 
-document.querySelector("#hints-button").onclick = function (event) {
-    event.preventDefault();
+function runAnalyze() {
     let text = removeAdviceReferences(getText());
     if (text !== getText()) {
         setText(text);
@@ -289,13 +274,14 @@ document.querySelector("#hints-button").onclick = function (event) {
     clearStickyTooltip();
     const matches = getAdviceMatches(text);
     currentAdviceMatches = matches;
-    if (matches.length === 0) {
-        showAnalyzeToast('You used all the possible Claritish options!');
-    }
     editorView.dispatch({
         effects: setAdviceMarks.of(buildAdviceDecorations(matches)),
     });
-};
+}
+
+if (savedText.trim()) {
+    runAnalyze();
+}
 
 const featuresDialog = document.querySelector("#features");
 const featuresBody = document.querySelector("#features-body");
