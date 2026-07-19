@@ -12,6 +12,17 @@ const FIRST_PERSON = String.raw`(?:I|i|we|We)(?:'(?:m|ve|d))?(?:\s+(?:am|are|was
 const NOTE_VIOLATION = String.raw`\b${FIRST_PERSON}\s+${ATTITUDE_WORDS}\b`
 const NOTE_FOLLOWED = String.raw`\b${FIRST_PERSON}\s+${ATTITUDE_WORDS}_${NOTE_LETTERS}\b`
 
+// Evidentiality: append _[nwrpitfsu] to claim hosts (predict_, caused_, mind verbs, reconstructive verbs)
+const EV_LETTERS = "[nwrpitfsu]"
+const EV_CODES = "<b>_n</b> None, <b>_w</b> Witnessed, <b>_r</b> Recorded, <b>_p</b> Pattern, <b>_i</b> Inferred, <b>_t</b> Told, <b>_f</b> Felt, <b>_s</b> Story, <b>_u</b> Unknown"
+const EV_HOSTS = String.raw`(?:caused|predict|thinks|figures|believes|feels|supposes|suspects|knows?|knew|realize[sd]?|realise[sd]?|remember(?:s|ed)?|recall(?:s|ed)?|means?|meant)`
+const EV_FOLLOWED = String.raw`\b${EV_HOSTS}_${EV_LETTERS}\b`
+const CAUSAL_CUES = String.raw`(?:because(?:\s+of)?|causes?|caused(?:\s+by)?|leads?\s+to|led\s+to|made\s+me|results?\s+in|blame|thanks\s+to)`
+const OTHER_MIND = String.raw`(?:thinks|figures|believes|feels|supposes|suspects)`
+const RECONSTRUCTIVE = String.raw`(?:knows?|knew|realize[sd]?|realise[sd]?|remember(?:s|ed)?|recall(?:s|ed)?|means?|meant)`
+const EV_VIOLATION = String.raw`\b(?:${CAUSAL_CUES}|${OTHER_MIND}|${RECONSTRUCTIVE})\b`
+const EV_SHOW_MORE = `Claims about the world — what happened, what someone thinks, what caused what — often smuggle in unchecked evidence. Tag the host with how you know: ${EV_CODES}. Examples: <b>predict_p</b> it rains this week; <b>caused_i</b> the delay; <b>thinks_t</b> I'm wrong; <b>knew_f</b> they were judging me. On first-person attitude verbs (<b>I think_m</b>), <b>_f/_s/_t</b> are mindfulness noting, not evidentiality.`
+
 // Flag N% / N percent unless reference class or change framing is explicit (see rules)
 const BARE_PERCENT_REGEX = String.raw`(?<!(?:from|to|top|bottom)\s)\b\d+(?:\.\d+)?(?:%|\s+percent\b)(?!\s*(?:of\b|relative\s+to\b|(?:complete|done|finished|full)\b))`
 const FOLLOWED_PERCENT_REGEX = String.raw`(?:\b\d+(?:\.\d+)?(?:%|\s+percent)\s+of\b|\b\d+(?:\.\d+)?\s+percentage points\b|\b\d+(?:\.\d+)?(?:%|\s+percent)\s+relative\s+to\b|\bfrom\s+\d+(?:\.\d+)?(?:%|\s+percent)\s+to\s+\d+(?:\.\d+)?(?:%|\s+percent)\b|(?:top|bottom)\s+\d+(?:\.\d+)?(?:%|\s+percent)\b|\b\d+(?:\.\d+)?(?:%|\s+percent)\s+(?:complete|done|finished|full)\b)`
@@ -34,14 +45,6 @@ const rules = [{
         description: `Append <b>{match}</b> with a value tag (a/c/r/p/u for ${VALUE_WORDS}) to foster gratitude for this item.`,
         showMore: "Tagging possessions with a value marker (e.g. <b>my+c</b> neighborhood for competence) reminds you what value they provide and fosters gratitude. Claritish replaces bare <b>my</b> with a value code — <b>+a</b> autonomy, <b>+c</b> competence, <b>+r</b> relatedness, <b>+p</b> pleasure, <b>+u</b> unspecified (or <b>-</b> when unmet) — so you notice why something matters to you instead of taking it for granted."
     }, {
-        // asserting thought of another person
-        name: "Mind-reading",
-        violation: `\\b(thinks|figures|believes|feels|supposes|suspects)\\b(?!${VALUE})`,
-        followed: `\\b(thinks|figures|believes|feels|supposes|suspects)(?:"|\\?)`,
-        points: 1,
-        description: `Add a " or ? to <b>{match}</b> to note whether you're mind-reading.`,
-        showMore: "You usually cannot know what someone else thinks or feels unless they told you. Assuming you do is the <b>mind-reading</b> cognitive distortion and often causes conflict. Add <b>\"</b> if they said it, or <b>?</b> if you are guessing — e.g. <b>she?</b> worries vs. <b>she</b> worries."
-    },     {
         // positive word (banned)
         name: "Neutral praise",
         violation: `\\b${POSITIVE_WORDS}\\b`,
@@ -77,18 +80,18 @@ const rules = [{
         // checks for future tense
         name: "Plan or predict",
         violation: /\b(will|\w+'ll|shall|going to|inteds?|might|tomorrow|soon|someday|(next|this) week(end)?)\b/i,
-        followed: /\b(?:plan_|predict_)(?:None|Vague|Detail|Contingency|Never|Sometimes|Mostly|Always|Unknown)\b/i,
+        followed: new RegExp(String.raw`\b(?:plan_(?:None|Vague|Detail|Contingency)|predict_${EV_LETTERS})\b`, "i"),
         points: 1,
-        description: "Replace <b>{match}</b> with plan_[None,Vague,Detail,Contingency] or predict_[Never,Sometimes,Mostly,Always,Unknown].",
-        showMore: "We cannot know the future for certain. Claritish splits future claims into <b>predict_</b> (how likely a pattern is: Never, Sometimes, Mostly, Always, Unknown) and <b>plan_</b> (how much planning backs an intention: None, Vague, Detail, Contingency). This prompts you to ask whether a forecast is well supported and whether you have done enough planning — e.g. <b>predict_Mostly</b> it rains vs. <b>plan_Contingency</b> I finish the report by Friday."
+        description: "Replace <b>{match}</b> with plan_[None,Vague,Detail,Contingency] or predict_[n,w,r,p,i,t,f,s,u].",
+        showMore: "We cannot know the future for certain. For intentions, use <b>plan_</b> (None, Vague, Detail, Contingency). For forecasts, use <b>predict_</b> plus an evidentiality tag — " + EV_CODES + ". Example: <b>plan_Contingency</b> I finish the report by Friday vs. <b>predict_p</b> it rains this week."
     }, {
-        // checks for past tense / memory claims
-        name: "Memory source",
-        violation: /\b(was|were|had|did|remember|recall|forgot|realized|knew|thought|yesterday|last (week|month|year)|(\d+|many) (days|weeks|months|years) ago|back then|used to|always (was|were|had))\b/i,
-        followed: /\bsource_(?:None|Inferred|Told|Felt|Story|Recorded|Witnessed)\b/i,
+        // interpretive claims: causation, other minds, reconstructive knowledge
+        name: "Evidentiality",
+        violation: EV_VIOLATION,
+        followed: EV_FOLLOWED,
         points: 1,
-        description: "Replace <b>{match}</b> with source_[None,Inferred,Told,Felt,Story,Recorded,Witnessed].",
-        showMore: "Past claims often mix what happened with what we inferred, were told, or have turned into a story. Claritish tags where the claim really comes from with <b>source_</b>: <b>None</b> (unchecked recall), <b>Inferred</b> (deduced), <b>Told</b> (secondhand), <b>Felt</b> (emotion as evidence), <b>Story</b> (a rehearsed narrative), <b>Recorded</b> (diary, text, photo), <b>Witnessed</b> (directly perceived). Picking the honest source catches hearsay-as-memory, emotional reasoning, and hindsight narratives — e.g. <b>source_Told</b> everyone hated the presentation vs. <b>source_Witnessed</b> two people walked out."
+        description: "Tag the claim host with evidentiality: append _[n,w,r,p,i,t,f,s,u] (e.g. caused_i, thinks_t, knew_f).",
+        showMore: EV_SHOW_MORE
     }, {
         // checks for to be
     //     violation: /\b(be|being|been|am|is|are|was|were|isn't|aren't|wasn't|weren't|ain't|I'm|we're|you're|he's|she's|it's|they're|there's|here's|where's|when's|why's|how's|who's|what's|that's)\b/i,

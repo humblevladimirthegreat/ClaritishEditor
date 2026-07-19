@@ -3,12 +3,11 @@ GRAMMAR:
 
 Values:
 -values have number for priority (need not be exact but helps prevent claiming everything is top priority)
--judgments have impact reversibility (temporary, trivial, effortful, hard, irreversible)
+-judgments have impact reversibility (temporary, trivial, effortful, hard, irreversible, unknown)
+
 
 Causation/Belief:
--subject is evidence?
--different types of causation (direct, indirect)
--degree of causation (always, sometimes)
+-add desire to evidentiality
 
 Consequence:
 -something that changeable, unchangeable, don't want to change right now, don't know if changeable
@@ -24,6 +23,7 @@ VOCAB:
 -incapable -> impossible, yet, choice (modality)
 -shame unworthiness vs acceptance
 -hardship that is practice, necessary for values, resilience training
+
 
 IDEAS:  
 coping ladder - some features shouldn't apply if too distressed
