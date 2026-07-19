@@ -6,9 +6,6 @@ Values:
 -judgments have impact reversibility (temporary, trivial, effortful, hard, irreversible, unknown)
 
 
-Causation/Belief:
--add desire to evidentiality
-
 Consequence:
 -something that changeable, unchangeable, don't want to change right now, don't know if changeable
 -long-term vs short-term

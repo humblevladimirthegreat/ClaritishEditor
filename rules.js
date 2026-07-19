@@ -12,16 +12,17 @@ const FIRST_PERSON = String.raw`(?:I|i|we|We)(?:'(?:m|ve|d))?(?:\s+(?:am|are|was
 const NOTE_VIOLATION = String.raw`\b${FIRST_PERSON}\s+${ATTITUDE_WORDS}\b`
 const NOTE_FOLLOWED = String.raw`\b${FIRST_PERSON}\s+${ATTITUDE_WORDS}_${NOTE_LETTERS}\b`
 
-// Evidentiality: append _[nwrpitfsu] to claim hosts (predict_, caused_, mind verbs, reconstructive verbs)
+// Evidentiality: append _[nwrpitfsu] to claim hosts (predict_, caused_, always_, never_, mind verbs, reconstructive verbs)
 const EV_LETTERS = "[nwrpitfsu]"
 const EV_CODES = "<b>_n</b> None, <b>_w</b> Witnessed, <b>_r</b> Recorded, <b>_p</b> Pattern, <b>_i</b> Inferred, <b>_t</b> Told, <b>_f</b> Felt, <b>_s</b> Story, <b>_u</b> Unknown"
-const EV_HOSTS = String.raw`(?:caused|predict|thinks|figures|believes|feels|supposes|suspects|knows?|knew|realize[sd]?|realise[sd]?|remember(?:s|ed)?|recall(?:s|ed)?|means?|meant)`
+const EV_HOSTS = String.raw`(?:caused|predict|always|never|thinks|figures|believes|feels|supposes|suspects|knows?|knew|realize[sd]?|realise[sd]?|remember(?:s|ed)?|recall(?:s|ed)?|means?|meant)`
 const EV_FOLLOWED = String.raw`\b${EV_HOSTS}_${EV_LETTERS}\b`
 const CAUSAL_CUES = String.raw`(?:because(?:\s+of)?|causes?|caused(?:\s+by)?|leads?\s+to|led\s+to|made\s+me|results?\s+in|blame|thanks\s+to)`
 const OTHER_MIND = String.raw`(?:thinks|figures|believes|feels|supposes|suspects)`
 const RECONSTRUCTIVE = String.raw`(?:knows?|knew|realize[sd]?|realise[sd]?|remember(?:s|ed)?|recall(?:s|ed)?|means?|meant)`
-const EV_VIOLATION = String.raw`\b(?:${CAUSAL_CUES}|${OTHER_MIND}|${RECONSTRUCTIVE})\b`
-const EV_SHOW_MORE = `Claims about the world — what happened, what someone thinks, what caused what — often smuggle in unchecked evidence. Tag the host with how you know: ${EV_CODES}. Examples: <b>predict_p</b> it rains this week; <b>caused_i</b> the delay; <b>thinks_t</b> I'm wrong; <b>knew_f</b> they were judging me. On first-person attitude verbs (<b>I think_m</b>), <b>_f/_s/_t</b> are mindfulness noting, not evidentiality.`
+const GENERALIZATION = String.raw`(?:always|never)`
+const EV_VIOLATION = String.raw`\b(?:${CAUSAL_CUES}|${OTHER_MIND}|${RECONSTRUCTIVE}|${GENERALIZATION})\b`
+const EV_SHOW_MORE = `Claims about the world — what happened, what someone thinks, what caused what, how often something happens — often smuggle in unchecked evidence. Tag the host with how you know: ${EV_CODES}. Examples: <b>predict_p</b> it rains this week; <b>caused_i</b> the delay; <b>thinks_t</b> I'm wrong; <b>knew_f</b> they were judging me; <b>always_p</b> I fail under pressure; <b>never_w</b> they listen. On first-person attitude verbs (<b>I think_m</b>), <b>_f/_s/_t</b> are mindfulness noting, not evidentiality.`
 
 // Flag N% / N percent unless reference class or change framing is explicit (see rules)
 const BARE_PERCENT_REGEX = String.raw`(?<!(?:from|to|top|bottom)\s)\b\d+(?:\.\d+)?(?:%|\s+percent\b)(?!\s*(?:of\b|relative\s+to\b|(?:complete|done|finished|full)\b))`
@@ -69,13 +70,13 @@ const rules = [{
         description: "Replace <b>{match}</b> with <b>eor</b> or <b>ior</b> to consider other options.",
         showMore: "<b>eor</b> (exhaustive or) means the listed options are the only ones possible; <b>ior</b> (inexhaustive or) means other options may exist too. Marking which kind of \"or\" you mean makes False Dichotomies easier to catch — when someone says only A or B is possible, hearing <b>eor</b> prompts both speaker and listener to ask whether the list is truly complete. Example: \"You are either with us <b>eor</b> against us\" invites the question: are there other stances besides those two?"
     }, {
-        // checks for general statements
+        // normative overgeneralization (should as universal rule)
         name: "Implies that",
-        violation: /\b(should|always|never)\b/i,
+        violation: /\bshould\b/i,
         followed: /\bimplies that\b/i,
         points: 1,
         description: "Replace <b>{match}</b> with \"x implies that...\".",
-        showMore: "Words like <b>should</b>, <b>always</b>, and <b>never</b> often signal overgeneralization — a broad rule stated without justification or counterexamples. Replacing them with <b>x implies that...</b> forces you to name the underlying claim and who it comes from (fact, preference, or source). Example: instead of \"hard work should earn a promotion,\" write \"my desire implies that large effort is sufficient for a promotion\" — making clear it is your hope, not a universal law, and inviting you to look for exceptions."
+        showMore: "<b>Should</b> often smuggles a personal or cultural preference in as a universal law. Replacing it with <b>x implies that...</b> forces you to name whose standard it is (fact, preference, or source). Example: instead of \"hard work should earn a promotion,\" write \"my desire implies that large effort is sufficient for a promotion\" — making clear it is your hope, not a universal rule, and inviting you to look for exceptions."
     }, {
         // checks for future tense
         name: "Plan or predict",
@@ -90,7 +91,7 @@ const rules = [{
         violation: EV_VIOLATION,
         followed: EV_FOLLOWED,
         points: 1,
-        description: "Tag the claim host with evidentiality: append _[n,w,r,p,i,t,f,s,u] (e.g. caused_i, thinks_t, knew_f).",
+        description: "Tag the claim host with evidentiality: append _[n,w,r,p,i,t,f,s,u] (e.g. caused_i, thinks_t, always_p, never_w).",
         showMore: EV_SHOW_MORE
     }, {
         // checks for to be
