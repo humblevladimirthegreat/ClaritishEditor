@@ -1,11 +1,11 @@
 // Changeability codes on unmet values and incapability hosts
-const CHANGEABILITY_LETTERS = "[tmiuw]"
-const CHANGEABILITY_CODES = "t temporary (usually able, not this moment), m modifiable, i irreversible, u unknown, w won't change now"
+const CHANGEABILITY_LETTERS = "[tmixw]"
+const CHANGEABILITY_CODES = "t temporary (usually able, not this moment), m modifiable, i irreversible, x unspecified, w won't change now"
 const POS_D = "\\+[a-z]\\b"
 const NEG_D = `\\-[a-z]${CHANGEABILITY_LETTERS}\\b`
 const VALUE = `(?:${POS_D}|${NEG_D})`
 const NEG_VALUE_NOTE = ` Negative tags append changeability (${CHANGEABILITY_CODES}); e.g. <b>-at</b> = unmet autonomy, temporary (usually able, not this moment).`
-const VALUE_TAGS = "a/c/r/p/s/u"
+const VALUE_TAGS = "a/c/r/p/s/x"
 const VALUE_WORDS = "[autonomy, competence, relatedness, pleasure, survival, unspecified]"
 
 // Emotion decompose: activation (h/m/l) × locus (i/e/c) × value tag on the judged host
@@ -22,11 +22,11 @@ const EMO_VIOLATION = String.raw`\b${EMOTION_WORDS}\b`
 // Keep valence praise/criticism from double-flagging emotion hosts
 const VALENCE_NOT_EMOTION = String.raw`(?!(?:${EMOTION_LIST})\b)`
 
-// Incapability: capability-denial hosts get _[tmiuw] (same changeability codes)
+// Incapability: capability-denial hosts get _[tmixw] (same changeability codes)
 const INCAP_HOSTS = String.raw`(?:can't|cannot|unable|incapable|impossible)`
 const INCAP_VIOLATION = String.raw`\b${INCAP_HOSTS}\b`
 const INCAP_FOLLOWED = String.raw`\b${INCAP_HOSTS}_${CHANGEABILITY_LETTERS}\b`
-const INCAP_SHOW_MORE = `Capability denials often smuggle permanence. Tag the host with changeability — the same codes as unmet values: ${CHANGEABILITY_CODES}. Plain-language gloss: <b>_t</b> usually able but not this moment; <b>_m</b> modifiable (effort may change it); <b>_i</b> impossible (as far as you can tell); <b>_w</b> choice (won't change now); <b>_u</b> unknown. Examples: <b>can't_t</b>  right now; <b>can't_m</b> swim yet; <b>impossible_i</b> for me to do; <b>can't_w</b> attend tonight (because I don't want to); <b>incapable_u</b> of leading this (because I don't know how).`
+const INCAP_SHOW_MORE = `Capability denials often smuggle permanence. Tag the host with changeability — the same codes as unmet values: ${CHANGEABILITY_CODES}. Plain-language gloss: <b>_t</b> usually able but not this moment; <b>_m</b> modifiable (effort may change it); <b>_i</b> impossible (as far as you can tell); <b>_w</b> choice (won't change now); <b>_x</b> unspecified. Examples: <b>can't_t</b>  right now; <b>can't_m</b> swim yet; <b>impossible_i</b> for me to do; <b>can't_w</b> attend tonight (because I don't want to); <b>incapable_x</b> of leading this (because I don't know how).`
 
 // Mindfulness noting: first-person attitude/stance verbs that often mark rumination get _l/_h/_f/_s/_t/_m
 const NOTE_LETTERS = "[lhfstm]"
@@ -37,9 +37,9 @@ const FIRST_PERSON = String.raw`(?:I|i|we|We)(?:'(?:m|ve|d))?(?:\s+(?:am|are|was
 const NOTE_VIOLATION = String.raw`\b${FIRST_PERSON}\s+${ATTITUDE_WORDS}\b`
 const NOTE_FOLLOWED = String.raw`\b${FIRST_PERSON}\s+${ATTITUDE_WORDS}_${NOTE_LETTERS}\b`
 
-// Evidentiality: append _[nwrpitfsu] to claim hosts (predict_, caused_, mind verbs, reconstructive verbs)
-const EV_LETTERS = "[nwrpitfsu]"
-const EV_CODES = "<b>_n</b> None, <b>_w</b> Witnessed, <b>_r</b> Recorded, <b>_p</b> Pattern, <b>_i</b> Inferred, <b>_t</b> Told, <b>_f</b> Felt, <b>_s</b> Story, <b>_u</b> Unknown"
+// Evidentiality: append _[nwrpitfsx] to claim hosts (predict_, caused_, mind verbs, reconstructive verbs)
+const EV_LETTERS = "[nwrpitfsx]"
+const EV_CODES = "<b>_n</b> None, <b>_w</b> Witnessed, <b>_r</b> Recorded, <b>_p</b> Pattern, <b>_i</b> Inferred, <b>_t</b> Told, <b>_f</b> Felt, <b>_s</b> Story, <b>_x</b> Unspecified"
 const EV_HOSTS = String.raw`(?:caused|predict|thinks|figures|believes|feels|supposes|suspects|knows?|knew|realize[sd]?|realise[sd]?|remember(?:s|ed)?|recall(?:s|ed)?|means?|meant)`
 const EV_FOLLOWED = String.raw`\b${EV_HOSTS}_${EV_LETTERS}\b`
 const CAUSAL_CUES = String.raw`(?:because(?:\s+of)?|causes?|caused(?:\s+by)?|leads?\s+to|led\s+to|made\s+me|results?\s+in|blame|thanks\s+to)`
@@ -54,7 +54,7 @@ const UNI_CODES = "<b>_l</b> logical (no counterexample can exist), <b>_u</b> un
 const UNI_HOSTS = String.raw`(?:always|never|every|all|none|everyone|anybody|whenever|wherever|no\s+one)`
 const UNI_VIOLATION = String.raw`\b${UNI_HOSTS}\b(?!_${UNI_LETTERS}\b)`
 const UNI_FOLLOWED = String.raw`\b${UNI_HOSTS}_${UNI_LETTERS}\b`
-const UNI_SHOW_MORE = `Quantifiers smuggle how exceptionless a claim is. Append one tag to the host: ${UNI_CODES}. Each form is legitimate — the point is to ask whether counterexamples exist and whether the scope is right. Examples: <b>always_c</b> I fail under pressure (usually, not without exception); <b>never_u</b> they listen (no counterexample comes to mind); <b>everyone_c</b> ignores me (usually, in my experience); <b>all_l</b> squares have four sides (true by definition). <b>_u</b> here means uncountered, not evidentiality Unknown. Major premise / scope phrases are not required yet.`
+const UNI_SHOW_MORE = `Quantifiers smuggle how exceptionless a claim is. Append one tag to the host: ${UNI_CODES}. Each form is legitimate — the point is to ask whether counterexamples exist and whether the scope is right. Examples: <b>always_c</b> I fail under pressure (usually, not without exception); <b>never_u</b> they listen (no counterexample comes to mind); <b>everyone_c</b> ignores me (usually, in my experience); <b>all_l</b> squares have four sides (true by definition). Major premise / scope phrases are not required yet.`
 
 // Flag N% / N percent unless reference class or change framing is explicit (see rules)
 const BARE_PERCENT_REGEX = String.raw`(?<!(?:from|to|top|bottom)\s)\b\d+(?:\.\d+)?(?:%|\s+percent\b)(?!\s*(?:of\b|relative\s+to\b|(?:complete|done|finished|full)\b))`
@@ -76,7 +76,7 @@ const rules = [{
         followed: `\\bmy${VALUE}`,
         points: 1,
         description: `Append <b>{match}</b> with a value tag (${VALUE_TAGS} for ${VALUE_WORDS}) to foster gratitude for this item.`,
-        showMore: `Tagging possessions with a value marker (e.g. <b>my+c</b> neighborhood for competence) reminds you what value they provide and fosters gratitude. Claritish replaces bare <b>my</b> with a value code — <b>+a</b> autonomy, <b>+c</b> competence, <b>+r</b> relatedness, <b>+p</b> pleasure, <b>+s</b> survival, <b>+u</b> unspecified (or <b>-</b> when unmet) — so you notice why something matters to you instead of taking it for granted.${NEG_VALUE_NOTE}`
+        showMore: `Tagging possessions with a value marker (e.g. <b>my+c</b> neighborhood for competence) reminds you what value they provide and fosters gratitude. Claritish replaces bare <b>my</b> with a value code — <b>+a</b> autonomy, <b>+c</b> competence, <b>+r</b> relatedness, <b>+p</b> pleasure, <b>+s</b> survival, <b>+x</b> unspecified (or <b>-</b> when unmet) — so you notice why something matters to you instead of taking it for granted.${NEG_VALUE_NOTE}`
     }, {
         // emotion word → activation × locus × value (judgment/explanation use)
         name: "Emotion decompose",
@@ -84,7 +84,7 @@ const rules = [{
         followed: EMO_FOLLOWED,
         points: 1,
         description: `Replace <b>{match}</b> with a more neutral description; append activation, locus, and a value tag (_[h/m/l][i/e/c] then ${VALUE_TAGS}) to the word you are judging.`,
-        showMore: `Emotion words smuggle activation, locus, need, and met/unmet into one opaque label. When the word is doing judgment or explanation work, Claritish replaces it and tags the host with <b>_[hml][iec]</b> plus a value tag: activation (${ACT_CODES}); locus (${LOCUS_CODES}); value (${VALUE_TAGS} for ${VALUE_WORDS}).${NEG_VALUE_NOTE} Examples: <b>anxious</b> about the talk → <b>talk_hc-ct</b> (high, circumstantial, unmet competence, temporary); <b>resentful</b> about the split → <b>split_he-ru</b> (high, external, unmet relatedness, unknown); <b>proud</b> of the draft → <b>draft_hi+c</b> (high, internal, met competence). When you are only contacting a raw feeling, you may leave the sensation unlabeled and skip this decompose until the emotion word is used to judge or explain.`
+        showMore: `Emotion words smuggle activation, locus, need, and met/unmet into one opaque label. When the word is doing judgment or explanation work, Claritish replaces it and tags the host with <b>_[hml][iec]</b> plus a value tag: activation (${ACT_CODES}); locus (${LOCUS_CODES}); value (${VALUE_TAGS} for ${VALUE_WORDS}).${NEG_VALUE_NOTE} Examples: <b>anxious</b> about the talk → <b>talk_hc-ct</b> (high, circumstantial, unmet competence, temporary); <b>resentful</b> about the split → <b>split_he-rx</b> (high, external, unmet relatedness, unspecified); <b>proud</b> of the draft → <b>draft_hi+c</b> (high, internal, met competence). When you are only contacting a raw feeling, you may leave the sensation unlabeled and skip this decompose until the emotion word is used to judge or explain.`
     }, {
         // positive word (banned); emotion hosts handled by Emotion decompose
         name: "Neutral praise",
@@ -92,7 +92,7 @@ const rules = [{
         followed: VALUE,
         points: 1,
         description: `Replace <b>{match}</b> with a more neutral description; append a value tag (${VALUE_TAGS} for ${VALUE_WORDS}) to the word you are judging.`,
-        showMore: `Loaded positive words smuggle judgment into the sentence. Claritish drops them so you describe what happened in neutral terms and name which value is met on the word you are judging — e.g. <b>gift+r</b> instead of calling it wonderful. Tags: <b>+a</b> autonomy, <b>+c</b> competence, <b>+r</b> relatedness, <b>+p</b> pleasure, <b>+s</b> survival, <b>+u</b> unspecified (or <b>-</b> when unmet).${NEG_VALUE_NOTE} Emotion words use <b>Emotion decompose</b> instead (activation × locus × value).`
+        showMore: `Loaded positive words smuggle judgment into the sentence. Claritish drops them so you describe what happened in neutral terms and name which value is met on the word you are judging — e.g. <b>gift+r</b> instead of calling it wonderful. Tags: <b>+a</b> autonomy, <b>+c</b> competence, <b>+r</b> relatedness, <b>+p</b> pleasure, <b>+s</b> survival, <b>+x</b> unspecified (or <b>-</b> when unmet).${NEG_VALUE_NOTE} Emotion words use <b>Emotion decompose</b> instead (activation × locus × value).`
     }, {
         // negative word (banned); emotion hosts handled by Emotion decompose
         name: "Neutral criticism",
@@ -100,7 +100,7 @@ const rules = [{
         followed: VALUE,
         points: 1,
         description: `Replace <b>{match}</b> with a more neutral description; append a value tag (${VALUE_TAGS} for ${VALUE_WORDS}) to the word you are judging.`,
-        showMore: `Loaded negative words smuggle judgment into the sentence. Claritish drops them so you describe what happened in neutral terms and name which value is unmet on the word you are judging — e.g. <b>meeting-at</b> instead of calling it awful. Tags: <b>+a</b> autonomy, <b>+c</b> competence, <b>+r</b> relatedness, <b>+p</b> pleasure, <b>+s</b> survival, <b>+u</b> unspecified (or <b>-</b> when unmet).${NEG_VALUE_NOTE} Emotion words use <b>Emotion decompose</b> instead (activation × locus × value).`
+        showMore: `Loaded negative words smuggle judgment into the sentence. Claritish drops them so you describe what happened in neutral terms and name which value is unmet on the word you are judging — e.g. <b>meeting-at</b> instead of calling it awful. Tags: <b>+a</b> autonomy, <b>+c</b> competence, <b>+r</b> relatedness, <b>+p</b> pleasure, <b>+s</b> survival, <b>+x</b> unspecified (or <b>-</b> when unmet).${NEG_VALUE_NOTE} Emotion words use <b>Emotion decompose</b> instead (activation × locus × value).`
     }, {
         // 'or' -> eor, ior
         name: "Exhaustive or",
@@ -116,14 +116,14 @@ const rules = [{
         followed: String.raw`\bshould${VALUE}`,
         points: 1,
         description: `Append a value tag (${VALUE_TAGS} for ${VALUE_WORDS}) to <b>{match}</b> to name which value the ought serves or protects.`,
-        showMore: `<b>Should</b> often smuggles a personal or cultural preference in as a universal law. Tagging it with a value marker forces you to name what is at stake instead of treating the ought as self-evident. Tags: <b>+a</b> autonomy, <b>+c</b> competence, <b>+r</b> relatedness, <b>+p</b> pleasure, <b>+s</b> survival, <b>+u</b> unspecified (or <b>-</b> when unmet).${NEG_VALUE_NOTE} Example: instead of "I should apologize," write <b>should+r</b> (relatedness); instead of "hard work should earn a promotion," write <b>should+c</b> (competence).`
+        showMore: `<b>Should</b> often smuggles a personal or cultural preference in as a universal law. Tagging it with a value marker forces you to name what is at stake instead of treating the ought as self-evident. Tags: <b>+a</b> autonomy, <b>+c</b> competence, <b>+r</b> relatedness, <b>+p</b> pleasure, <b>+s</b> survival, <b>+x</b> unspecified (or <b>-</b> when unmet).${NEG_VALUE_NOTE} Example: instead of "I should apologize," write <b>should+r</b> (relatedness); instead of "hard work should earn a promotion," write <b>should+c</b> (competence).`
     }, {
         // checks for future tense
         name: "Plan or predict",
         violation: /\b(will|\w+'ll|shall|going to|inteds?|might|tomorrow|soon|someday|(next|this) week(end)?)\b/i,
         followed: new RegExp(String.raw`\b(?:plan_(?:None|Vague|Detail|Contingency)|predict_${EV_LETTERS})\b`, "i"),
         points: 1,
-        description: "Replace <b>{match}</b> with plan_[None,Vague,Detail,Contingency] or predict_[n,w,r,p,i,t,f,s,u].",
+        description: "Replace <b>{match}</b> with plan_[None,Vague,Detail,Contingency] or predict_[n,w,r,p,i,t,f,s,x].",
         showMore: "We cannot know the future for certain. For intentions, use <b>plan_</b> (None, Vague, Detail, Contingency). For forecasts, use <b>predict_</b> plus an evidentiality tag — " + EV_CODES + ". Example: <b>plan_Contingency</b> I finish the report by Friday vs. <b>predict_p</b> it rains this week."
     }, {
         // quantifier strength: logical / uncountered / common
@@ -139,7 +139,7 @@ const rules = [{
         violation: EV_VIOLATION,
         followed: EV_FOLLOWED,
         points: 1,
-        description: "Tag the claim host with evidentiality: append _[n,w,r,p,i,t,f,s,u] (e.g. caused_i, thinks_t, knew_f).",
+        description: "Tag the claim host with evidentiality: append _[n,w,r,p,i,t,f,s,x] (e.g. caused_i, thinks_t, knew_f).",
         showMore: EV_SHOW_MORE
     }, {
         // checks for to be
@@ -169,7 +169,7 @@ const rules = [{
         violation: INCAP_VIOLATION,
         followed: INCAP_FOLLOWED,
         points: 1,
-        description: `Append changeability to <b>{match}</b>: _[t,m,i,u,w] (${CHANGEABILITY_CODES}).`,
+        description: `Append changeability to <b>{match}</b>: _[t,m,i,x,w] (${CHANGEABILITY_CODES}).`,
         showMore: INCAP_SHOW_MORE
     }, {
         // checks for single problems/solutions/goals
