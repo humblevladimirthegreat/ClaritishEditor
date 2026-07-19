@@ -46,15 +46,15 @@ const CAUSAL_CUES = String.raw`(?:because(?:\s+of)?|causes?|caused(?:\s+by)?|lea
 const OTHER_MIND = String.raw`(?:thinks|figures|believes|feels|supposes|suspects)`
 const RECONSTRUCTIVE = String.raw`(?:knows?|knew|realize[sd]?|realise[sd]?|remember(?:s|ed)?|recall(?:s|ed)?|means?|meant)`
 const EV_VIOLATION = String.raw`\b(?:${CAUSAL_CUES}|${OTHER_MIND}|${RECONSTRUCTIVE})\b`
-const EV_SHOW_MORE = `Claims about the world — what happened, what someone thinks, what caused what — often smuggle in unchecked evidence. Tag the host with how you know: ${EV_CODES}. Examples: <b>predict_p</b> it rains this week; <b>caused_i</b> the delay; <b>thinks_t</b> I'm wrong; <b>knew_f</b> they were judging me. On first-person attitude verbs (<b>I think_m</b>), <b>_f/_s/_t</b> are mindfulness noting, not evidentiality. Quantifiers use <b>Universality</b> instead.`
+const EV_SHOW_MORE = `Claims about the world — what happened, what someone thinks, what caused what — often smuggle in unchecked evidence. Tag the host with how you know: ${EV_CODES}. Examples: <b>predict_p</b> it rains this week; <b>caused_i</b> the delay; <b>thinks_t</b> I'm wrong; <b>knew_f</b> they were judging me. On first-person attitude verbs (<b>I think_m</b>), <b>_f/_s/_t</b> are mindfulness noting, not evidentiality. Natural universals pack evidentiality on the quantifier (<b>always_lnp</b>); causal hosts still use <b>caused_i</b> etc. Other quantifiers use <b>Universality</b>.`
 
-// Universality: append _[luc] to quantifier hosts (always, never, every, all, none, no one, everyone, anybody, whenever, wherever)
-const UNI_LETTERS = "[luc]"
-const UNI_CODES = "<b>_l</b> logical (no counterexample can exist), <b>_u</b> uncountered (cannot think of counterexamples), <b>_c</b> common (statistically usual)"
+// Universality: _u/_c, or logical via _lf / _ln+evidentiality / _lr(scope) on quantifier hosts
+const UNI_TAG_BODY = String.raw`(?:u|c|lf|ln${EV_LETTERS}|lr\s*\([^)]+\))`
+const UNI_CODES = "<b>_u</b> uncountered (cannot think of counterexamples), <b>_c</b> common (statistically usual), <b>_lf</b> formal (definition/math), <b>_ln</b>+evidentiality natural, <b>_lr(scope)</b> rule"
 const UNI_HOSTS = String.raw`(?:always|never|every|all|none|everyone|anybody|whenever|wherever|no\s+one)`
-const UNI_VIOLATION = String.raw`\b${UNI_HOSTS}\b(?!_${UNI_LETTERS}\b)`
-const UNI_FOLLOWED = String.raw`\b${UNI_HOSTS}_${UNI_LETTERS}\b`
-const UNI_SHOW_MORE = `Quantifiers smuggle how exceptionless a claim is. Append one tag to the host: ${UNI_CODES}. Each form is legitimate — the point is to ask whether counterexamples exist and whether the scope is right. Examples: <b>always_c</b> I fail under pressure (usually, not without exception); <b>never_u</b> they listen (no counterexample comes to mind); <b>everyone_c</b> ignores me (usually, in my experience); <b>all_l</b> squares have four sides (true by definition). Major premise / scope phrases are not required yet.`
+const UNI_VIOLATION = String.raw`\b${UNI_HOSTS}(?:\b(?!_${UNI_TAG_BODY})|_(?!(?:u|c|lf|ln${EV_LETTERS})\b|lr\s*\([^)]+\)))`
+const UNI_FOLLOWED = String.raw`\b${UNI_HOSTS}_(?:u\b|c\b|lf\b|ln${EV_LETTERS}\b|lr\s*\([^)]+\))`
+const UNI_SHOW_MORE = `Quantifiers smuggle how exceptionless a claim is. Append one tag to the host: ${UNI_CODES}. Each form is legitimate — the point is to ask whether counterexamples exist and whether the scope is right. <b>_u</b> and <b>_c</b> need no major premise. For logical force (no counterexample can exist), name the warrant: <b>_lf</b> formal (definition, math, proof) — <b>all_lf</b> squares have four sides; <b>_ln</b> plus an evidentiality letter for natural necessity — ${EV_CODES} — <b>always_lnp</b> unsupported objects fall; <b>_lr(scope)</b> for a named rule or frame — <b>always_lr(chess)</b> bishops stay on one color, <b>always_lr (this model)</b> agents maximize utility. If none of these fit, use <b>_u</b> or <b>_c</b> instead of logical. Examples: <b>always_c</b> I fail under pressure (usually, not without exception); <b>never_u</b> they listen (no counterexample comes to mind); <b>everyone_c</b> ignores me (usually, in my experience). <b>_u</b> here means uncountered, not evidentiality Unspecified.`
 
 // Flag N% / N percent unless reference class or change framing is explicit (see rules)
 const BARE_PERCENT_REGEX = String.raw`(?<!(?:from|to|top|bottom)\s)\b\d+(?:\.\d+)?(?:%|\s+percent\b)(?!\s*(?:of\b|relative\s+to\b|(?:complete|done|finished|full)\b))`
@@ -131,7 +131,7 @@ const rules = [{
         violation: UNI_VIOLATION,
         followed: UNI_FOLLOWED,
         points: 1,
-        description: "Append universality to <b>{match}</b>: _l/_u/_c (logical, uncountered, common).",
+        description: "Append universality to <b>{match}</b>: _u/_c (uncountered, common) or logical via _lf / _ln+evidentiality / _lr(scope).",
         showMore: UNI_SHOW_MORE
     }, {
         // interpretive claims: causation, other minds, reconstructive knowledge
