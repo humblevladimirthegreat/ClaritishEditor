@@ -1,7 +1,8 @@
 const POS_D = "\\+[a-z]\\b"
 const NEG_D = "\\-[a-z]\\b"
 const VALUE = `(?:${POS_D}|${NEG_D})`
-const VALUE_WORDS = "[autonomy, competence, relatedness, pleasure, unspecified]"
+const VALUE_TAGS = "a/c/r/p/s/u"
+const VALUE_WORDS = "[autonomy, competence, relatedness, pleasure, survival, unspecified]"
 
 // Mindfulness noting: first-person attitude/stance verbs that often mark rumination get _l/_h/_f/_s/_t/_m
 const NOTE_LETTERS = "[lhfstm]"
@@ -43,24 +44,24 @@ const rules = [{
         violation: `\\b((?<![-+])my)\\b(?!${VALUE})`,
         followed: `\\bmy${VALUE}`,
         points: 1,
-        description: `Append <b>{match}</b> with a value tag (a/c/r/p/u for ${VALUE_WORDS}) to foster gratitude for this item.`,
-        showMore: "Tagging possessions with a value marker (e.g. <b>my+c</b> neighborhood for competence) reminds you what value they provide and fosters gratitude. Claritish replaces bare <b>my</b> with a value code — <b>+a</b> autonomy, <b>+c</b> competence, <b>+r</b> relatedness, <b>+p</b> pleasure, <b>+u</b> unspecified (or <b>-</b> when unmet) — so you notice why something matters to you instead of taking it for granted."
+        description: `Append <b>{match}</b> with a value tag (${VALUE_TAGS} for ${VALUE_WORDS}) to foster gratitude for this item.`,
+        showMore: `Tagging possessions with a value marker (e.g. <b>my+c</b> neighborhood for competence) reminds you what value they provide and fosters gratitude. Claritish replaces bare <b>my</b> with a value code — <b>+a</b> autonomy, <b>+c</b> competence, <b>+r</b> relatedness, <b>+p</b> pleasure, <b>+s</b> survival, <b>+u</b> unspecified (or <b>-</b> when unmet) — so you notice why something matters to you instead of taking it for granted.`
     }, {
         // positive word (banned)
         name: "Neutral praise",
         violation: `\\b${POSITIVE_WORDS}\\b`,
         followed: VALUE,
         points: 1,
-        description: `Replace <b>{match}</b> with a more neutral description; append a value tag (a/c/r/p/u for ${VALUE_WORDS}) to the word you are judging.`,
-        showMore: `Loaded positive words smuggle judgment into the sentence. Claritish drops them so you describe what happened in neutral terms and name which value is met on the word you are judging — e.g. <b>gift+r</b> instead of calling it wonderful. Tags: <b>+a</b> autonomy, <b>+c</b> competence, <b>+r</b> relatedness, <b>+p</b> pleasure, <b>+u</b> unspecified (or <b>-</b> when unmet).`
+        description: `Replace <b>{match}</b> with a more neutral description; append a value tag (${VALUE_TAGS} for ${VALUE_WORDS}) to the word you are judging.`,
+        showMore: `Loaded positive words smuggle judgment into the sentence. Claritish drops them so you describe what happened in neutral terms and name which value is met on the word you are judging — e.g. <b>gift+r</b> instead of calling it wonderful. Tags: <b>+a</b> autonomy, <b>+c</b> competence, <b>+r</b> relatedness, <b>+p</b> pleasure, <b>+s</b> survival, <b>+u</b> unspecified (or <b>-</b> when unmet).`
     }, {
         // negative word (banned)
         name: "Neutral criticism",
         violation: `\\b${NEGATIVE_WORDS}\\b`,
         followed: VALUE,
         points: 1,
-        description: `Replace <b>{match}</b> with a more neutral description; append a value tag (a/c/r/p/u for ${VALUE_WORDS}) to the word you are judging.`,
-        showMore: `Loaded negative words smuggle judgment into the sentence. Claritish drops them so you describe what happened in neutral terms and name which value is unmet on the word you are judging — e.g. <b>meeting-a</b> instead of calling it awful. Tags: <b>+a</b> autonomy, <b>+c</b> competence, <b>+r</b> relatedness, <b>+p</b> pleasure, <b>+u</b> unspecified (or <b>-</b> when unmet).`
+        description: `Replace <b>{match}</b> with a more neutral description; append a value tag (${VALUE_TAGS} for ${VALUE_WORDS}) to the word you are judging.`,
+        showMore: `Loaded negative words smuggle judgment into the sentence. Claritish drops them so you describe what happened in neutral terms and name which value is unmet on the word you are judging — e.g. <b>meeting-a</b> instead of calling it awful. Tags: <b>+a</b> autonomy, <b>+c</b> competence, <b>+r</b> relatedness, <b>+p</b> pleasure, <b>+s</b> survival, <b>+u</b> unspecified (or <b>-</b> when unmet).`
     }, {
         // 'or' -> eor, ior
         name: "Exhaustive or",
@@ -75,8 +76,8 @@ const rules = [{
         violation: String.raw`\bshould\b(?!${VALUE})`,
         followed: String.raw`\bshould${VALUE}`,
         points: 1,
-        description: `Append a value tag (a/c/r/p/u for ${VALUE_WORDS}) to <b>{match}</b> to name which value the ought serves or protects.`,
-        showMore: `<b>Should</b> often smuggles a personal or cultural preference in as a universal law. Tagging it with a value marker forces you to name what is at stake instead of treating the ought as self-evident. Tags: <b>+a</b> autonomy, <b>+c</b> competence, <b>+r</b> relatedness, <b>+p</b> pleasure, <b>+u</b> unspecified (or <b>-</b> when unmet). Example: instead of "I should apologize," write <b>should+r</b> (relatedness); instead of "hard work should earn a promotion," write <b>should+c</b> (competence).`
+        description: `Append a value tag (${VALUE_TAGS} for ${VALUE_WORDS}) to <b>{match}</b> to name which value the ought serves or protects.`,
+        showMore: `<b>Should</b> often smuggles a personal or cultural preference in as a universal law. Tagging it with a value marker forces you to name what is at stake instead of treating the ought as self-evident. Tags: <b>+a</b> autonomy, <b>+c</b> competence, <b>+r</b> relatedness, <b>+p</b> pleasure, <b>+s</b> survival, <b>+u</b> unspecified (or <b>-</b> when unmet). Example: instead of "I should apologize," write <b>should+r</b> (relatedness); instead of "hard work should earn a promotion," write <b>should+c</b> (competence).`
     }, {
         // checks for future tense
         name: "Plan or predict",
@@ -113,8 +114,8 @@ const rules = [{
         violation: /\b(need to|have to)\b/i,
         followed: `\\b(?:I|we|you|he|she|they|my|our|your|his|her|their)${VALUE}`,
         points: 1,
-        description: `Remove <b>{match}</b> and consider why you're really doing it. ${VALUE_WORDS} (a/c/r/p/u)`,
-        showMore: `<b>Need to</b> and <b>have to</b> can disguise a real emotional motive or make choices feel coerced. Removing them and naming the value you intend to fill — ${VALUE_WORDS} (a/c/r/p/u) — makes the reason explicit and puts you back in choice. Example: instead of "I have to apologize," consider "I+r am apologizing" (to restore relatedness).`
+        description: `Remove <b>{match}</b> and consider why you're really doing it. ${VALUE_WORDS} (${VALUE_TAGS})`,
+        showMore: `<b>Need to</b> and <b>have to</b> can disguise a real emotional motive or make choices feel coerced. Removing them and naming the value you intend to fill — ${VALUE_WORDS} (${VALUE_TAGS}) — makes the reason explicit and puts you back in choice. Example: instead of "I have to apologize," consider "I+r am apologizing" (to restore relatedness).`
     }, {
         // checks for single problems/solutions/goals
         name: "Numbered alternatives",
