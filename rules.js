@@ -37,17 +37,24 @@ const FIRST_PERSON = String.raw`(?:I|i|we|We)(?:'(?:m|ve|d))?(?:\s+(?:am|are|was
 const NOTE_VIOLATION = String.raw`\b${FIRST_PERSON}\s+${ATTITUDE_WORDS}\b`
 const NOTE_FOLLOWED = String.raw`\b${FIRST_PERSON}\s+${ATTITUDE_WORDS}_${NOTE_LETTERS}\b`
 
-// Evidentiality: append _[nwrpitfsu] to claim hosts (predict_, caused_, always_, never_, mind verbs, reconstructive verbs)
+// Evidentiality: append _[nwrpitfsu] to claim hosts (predict_, caused_, mind verbs, reconstructive verbs)
 const EV_LETTERS = "[nwrpitfsu]"
 const EV_CODES = "<b>_n</b> None, <b>_w</b> Witnessed, <b>_r</b> Recorded, <b>_p</b> Pattern, <b>_i</b> Inferred, <b>_t</b> Told, <b>_f</b> Felt, <b>_s</b> Story, <b>_u</b> Unknown"
-const EV_HOSTS = String.raw`(?:caused|predict|always|never|thinks|figures|believes|feels|supposes|suspects|knows?|knew|realize[sd]?|realise[sd]?|remember(?:s|ed)?|recall(?:s|ed)?|means?|meant)`
+const EV_HOSTS = String.raw`(?:caused|predict|thinks|figures|believes|feels|supposes|suspects|knows?|knew|realize[sd]?|realise[sd]?|remember(?:s|ed)?|recall(?:s|ed)?|means?|meant)`
 const EV_FOLLOWED = String.raw`\b${EV_HOSTS}_${EV_LETTERS}\b`
 const CAUSAL_CUES = String.raw`(?:because(?:\s+of)?|causes?|caused(?:\s+by)?|leads?\s+to|led\s+to|made\s+me|results?\s+in|blame|thanks\s+to)`
 const OTHER_MIND = String.raw`(?:thinks|figures|believes|feels|supposes|suspects)`
 const RECONSTRUCTIVE = String.raw`(?:knows?|knew|realize[sd]?|realise[sd]?|remember(?:s|ed)?|recall(?:s|ed)?|means?|meant)`
-const GENERALIZATION = String.raw`(?:always|never)`
-const EV_VIOLATION = String.raw`\b(?:${CAUSAL_CUES}|${OTHER_MIND}|${RECONSTRUCTIVE}|${GENERALIZATION})\b`
-const EV_SHOW_MORE = `Claims about the world — what happened, what someone thinks, what caused what, how often something happens — often smuggle in unchecked evidence. Tag the host with how you know: ${EV_CODES}. Examples: <b>predict_p</b> it rains this week; <b>caused_i</b> the delay; <b>thinks_t</b> I'm wrong; <b>knew_f</b> they were judging me; <b>always_p</b> I fail under pressure; <b>never_w</b> they listen. On first-person attitude verbs (<b>I think_m</b>), <b>_f/_s/_t</b> are mindfulness noting, not evidentiality.`
+const EV_VIOLATION = String.raw`\b(?:${CAUSAL_CUES}|${OTHER_MIND}|${RECONSTRUCTIVE})\b`
+const EV_SHOW_MORE = `Claims about the world — what happened, what someone thinks, what caused what — often smuggle in unchecked evidence. Tag the host with how you know: ${EV_CODES}. Examples: <b>predict_p</b> it rains this week; <b>caused_i</b> the delay; <b>thinks_t</b> I'm wrong; <b>knew_f</b> they were judging me. On first-person attitude verbs (<b>I think_m</b>), <b>_f/_s/_t</b> are mindfulness noting, not evidentiality. Quantifiers use <b>Universality</b> instead.`
+
+// Universality: append _[luc] to quantifier hosts (always, never, every, all, none, no one, everyone, anybody, whenever, wherever)
+const UNI_LETTERS = "[luc]"
+const UNI_CODES = "<b>_l</b> logical (no counterexample can exist), <b>_u</b> uncountered (cannot think of counterexamples), <b>_c</b> common (statistically usual)"
+const UNI_HOSTS = String.raw`(?:always|never|every|all|none|everyone|anybody|whenever|wherever|no\s+one)`
+const UNI_VIOLATION = String.raw`\b${UNI_HOSTS}\b(?!_${UNI_LETTERS}\b)`
+const UNI_FOLLOWED = String.raw`\b${UNI_HOSTS}_${UNI_LETTERS}\b`
+const UNI_SHOW_MORE = `Quantifiers smuggle how exceptionless a claim is. Append one tag to the host: ${UNI_CODES}. Each form is legitimate — the point is to ask whether counterexamples exist and whether the scope is right. Examples: <b>always_c</b> I fail under pressure (usually, not without exception); <b>never_u</b> they listen (no counterexample comes to mind); <b>everyone_c</b> ignores me (usually, in my experience); <b>all_l</b> squares have four sides (true by definition). <b>_u</b> here means uncountered, not evidentiality Unknown. Major premise / scope phrases are not required yet.`
 
 // Flag N% / N percent unless reference class or change framing is explicit (see rules)
 const BARE_PERCENT_REGEX = String.raw`(?<!(?:from|to|top|bottom)\s)\b\d+(?:\.\d+)?(?:%|\s+percent\b)(?!\s*(?:of\b|relative\s+to\b|(?:complete|done|finished|full)\b))`
@@ -119,12 +126,20 @@ const rules = [{
         description: "Replace <b>{match}</b> with plan_[None,Vague,Detail,Contingency] or predict_[n,w,r,p,i,t,f,s,u].",
         showMore: "We cannot know the future for certain. For intentions, use <b>plan_</b> (None, Vague, Detail, Contingency). For forecasts, use <b>predict_</b> plus an evidentiality tag — " + EV_CODES + ". Example: <b>plan_Contingency</b> I finish the report by Friday vs. <b>predict_p</b> it rains this week."
     }, {
+        // quantifier strength: logical / uncountered / common
+        name: "Universality",
+        violation: UNI_VIOLATION,
+        followed: UNI_FOLLOWED,
+        points: 1,
+        description: "Append universality to <b>{match}</b>: _l/_u/_c (logical, uncountered, common).",
+        showMore: UNI_SHOW_MORE
+    }, {
         // interpretive claims: causation, other minds, reconstructive knowledge
         name: "Evidentiality",
         violation: EV_VIOLATION,
         followed: EV_FOLLOWED,
         points: 1,
-        description: "Tag the claim host with evidentiality: append _[n,w,r,p,i,t,f,s,u] (e.g. caused_i, thinks_t, always_p, never_w).",
+        description: "Tag the claim host with evidentiality: append _[n,w,r,p,i,t,f,s,u] (e.g. caused_i, thinks_t, knew_f).",
         showMore: EV_SHOW_MORE
     }, {
         // checks for to be

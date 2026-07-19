@@ -1,5 +1,5 @@
 GRAMMAR:
-
+-require stating major premise (scope phrase for quantifiers)
 
 Values:
 -values have number for priority (need not be exact but helps prevent claiming everything is top priority)
