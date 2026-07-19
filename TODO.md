@@ -3,7 +3,7 @@ GRAMMAR:
 
 Values:
 -values have number for priority (need not be exact but helps prevent claiming everything is top priority)
--judgments have impact reversibility (temporary, trivial, effortful, hard, irreversible, unknown)
+-judgments have impact reversibility (temporary, easy, medium, hard, irreversible, unknown)
 
 
 Consequence:
