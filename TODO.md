@@ -9,5 +9,5 @@ Values:
 VOCAB:
 -hello has value
 -goals/plan tense should have values-alignment
--habit uses causation
--hardship that is practice, necessary for values, resilience training
+-habit uses evidentiality, maybe cue. Consider splitting on frequent,schedule,trigger
+-hardship that is practice, necessary for values, resilience training, too stressful

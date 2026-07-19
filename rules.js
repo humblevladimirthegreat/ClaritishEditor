@@ -8,6 +8,20 @@ const NEG_VALUE_NOTE = ` Negative tags append changeability (${CHANGEABILITY_COD
 const VALUE_TAGS = "a/c/r/p/s/u"
 const VALUE_WORDS = "[autonomy, competence, relatedness, pleasure, survival, unspecified]"
 
+// Emotion decompose: activation (h/m/l) × locus (i/e/c) × value tag on the judged host
+// Attitude verbs handled by Mindfulness noting (fear/worry/regret/dread/hope) are omitted here.
+const ACT_LETTERS = "[hml]"
+const ACT_CODES = "h high, m medium, l low"
+const LOCUS_LETTERS = "[iec]"
+const LOCUS_CODES = "i internal, e external, c circumstantial"
+const EMO_TAG = `_${ACT_LETTERS}${LOCUS_LETTERS}(?:\\+[a-z]|-[a-z]${CHANGEABILITY_LETTERS})`
+const EMO_FOLLOWED = String.raw`\b\w+${EMO_TAG}\b`
+const EMOTION_LIST = "affection|affectionate|afraid|alienated|alienation|anger|angered|angrier|angriest|angry|anguish|anguished|anxiety|anxious|apprehensive|ashamed|bitterness|comfortable|comforted|confidence|confident|contented|contentment|defeated|dejected|delighted|delight|depressed|depression|despair|despairing|desperate|devastated|disappointed|disappointment|disgust|disgusted|dreadful|elated|elation|embarrassed|embarrassment|envious|envy|euphoria|euphoric|excited|excitement|fearful|frustrated|frustration|furious|fury|grateful|gratitude|grief|grieving|guilty|guilt|heartbroken|hopeless|hopelessness|horrified|horror|humiliated|hurt|interested|jealous|jealousy|joyful|lonely|loneliness|miserable|misery|outraged|outrage|panicked|panic|passion|passionate|pride|proud|rage|regretful|relieved|relief|resentful|resentment|sad|sadness|serene|serenity|shame|terrified|terror|thrilled|wistful|worried|wretched"
+const EMOTION_WORDS = `(?:${EMOTION_LIST})`
+const EMO_VIOLATION = String.raw`\b${EMOTION_WORDS}\b`
+// Keep valence praise/criticism from double-flagging emotion hosts
+const VALENCE_NOT_EMOTION = String.raw`(?!(?:${EMOTION_LIST})\b)`
+
 // Incapability: capability-denial hosts get _[tmiuw] (same changeability codes)
 const INCAP_HOSTS = String.raw`(?:can't|cannot|unable|incapable|impossible)`
 const INCAP_VIOLATION = String.raw`\b${INCAP_HOSTS}\b`
@@ -57,21 +71,29 @@ const rules = [{
         description: `Append <b>{match}</b> with a value tag (${VALUE_TAGS} for ${VALUE_WORDS}) to foster gratitude for this item.`,
         showMore: `Tagging possessions with a value marker (e.g. <b>my+c</b> neighborhood for competence) reminds you what value they provide and fosters gratitude. Claritish replaces bare <b>my</b> with a value code — <b>+a</b> autonomy, <b>+c</b> competence, <b>+r</b> relatedness, <b>+p</b> pleasure, <b>+s</b> survival, <b>+u</b> unspecified (or <b>-</b> when unmet) — so you notice why something matters to you instead of taking it for granted.${NEG_VALUE_NOTE}`
     }, {
-        // positive word (banned)
-        name: "Neutral praise",
-        violation: `\\b${POSITIVE_WORDS}\\b`,
-        followed: VALUE,
+        // emotion word → activation × locus × value (judgment/explanation use)
+        name: "Emotion decompose",
+        violation: EMO_VIOLATION,
+        followed: EMO_FOLLOWED,
         points: 1,
-        description: `Replace <b>{match}</b> with a more neutral description; append a value tag (${VALUE_TAGS} for ${VALUE_WORDS}) to the word you are judging.`,
-        showMore: `Loaded positive words smuggle judgment into the sentence. Claritish drops them so you describe what happened in neutral terms and name which value is met on the word you are judging — e.g. <b>gift+r</b> instead of calling it wonderful. Tags: <b>+a</b> autonomy, <b>+c</b> competence, <b>+r</b> relatedness, <b>+p</b> pleasure, <b>+s</b> survival, <b>+u</b> unspecified (or <b>-</b> when unmet).${NEG_VALUE_NOTE}`
+        description: `Replace <b>{match}</b> with a more neutral description; append activation, locus, and a value tag (_[h/m/l][i/e/c] then ${VALUE_TAGS}) to the word you are judging.`,
+        showMore: `Emotion words smuggle activation, locus, need, and met/unmet into one opaque label. When the word is doing judgment or explanation work, Claritish replaces it and tags the host with <b>_[hml][iec]</b> plus a value tag: activation (${ACT_CODES}); locus (${LOCUS_CODES}); value (${VALUE_TAGS} for ${VALUE_WORDS}).${NEG_VALUE_NOTE} Examples: <b>anxious</b> about the talk → <b>talk_hc-ct</b> (high, circumstantial, unmet competence, temporary); <b>resentful</b> about the split → <b>split_he-ru</b> (high, external, unmet relatedness, unknown); <b>proud</b> of the draft → <b>draft_hi+c</b> (high, internal, met competence). When you are only contacting a raw feeling, you may leave the sensation unlabeled and skip this decompose until the emotion word is used to judge or explain.`
     }, {
-        // negative word (banned)
-        name: "Neutral criticism",
-        violation: `\\b${NEGATIVE_WORDS}\\b`,
+        // positive word (banned); emotion hosts handled by Emotion decompose
+        name: "Neutral praise",
+        violation: `\\b${VALENCE_NOT_EMOTION}${POSITIVE_WORDS}\\b`,
         followed: VALUE,
         points: 1,
         description: `Replace <b>{match}</b> with a more neutral description; append a value tag (${VALUE_TAGS} for ${VALUE_WORDS}) to the word you are judging.`,
-        showMore: `Loaded negative words smuggle judgment into the sentence. Claritish drops them so you describe what happened in neutral terms and name which value is unmet on the word you are judging — e.g. <b>meeting-at</b> instead of calling it awful. Tags: <b>+a</b> autonomy, <b>+c</b> competence, <b>+r</b> relatedness, <b>+p</b> pleasure, <b>+s</b> survival, <b>+u</b> unspecified (or <b>-</b> when unmet).${NEG_VALUE_NOTE}`
+        showMore: `Loaded positive words smuggle judgment into the sentence. Claritish drops them so you describe what happened in neutral terms and name which value is met on the word you are judging — e.g. <b>gift+r</b> instead of calling it wonderful. Tags: <b>+a</b> autonomy, <b>+c</b> competence, <b>+r</b> relatedness, <b>+p</b> pleasure, <b>+s</b> survival, <b>+u</b> unspecified (or <b>-</b> when unmet).${NEG_VALUE_NOTE} Emotion words use <b>Emotion decompose</b> instead (activation × locus × value).`
+    }, {
+        // negative word (banned); emotion hosts handled by Emotion decompose
+        name: "Neutral criticism",
+        violation: `\\b${VALENCE_NOT_EMOTION}${NEGATIVE_WORDS}\\b`,
+        followed: VALUE,
+        points: 1,
+        description: `Replace <b>{match}</b> with a more neutral description; append a value tag (${VALUE_TAGS} for ${VALUE_WORDS}) to the word you are judging.`,
+        showMore: `Loaded negative words smuggle judgment into the sentence. Claritish drops them so you describe what happened in neutral terms and name which value is unmet on the word you are judging — e.g. <b>meeting-at</b> instead of calling it awful. Tags: <b>+a</b> autonomy, <b>+c</b> competence, <b>+r</b> relatedness, <b>+p</b> pleasure, <b>+s</b> survival, <b>+u</b> unspecified (or <b>-</b> when unmet).${NEG_VALUE_NOTE} Emotion words use <b>Emotion decompose</b> instead (activation × locus × value).`
     }, {
         // 'or' -> eor, ior
         name: "Exhaustive or",
