@@ -1,11 +1,18 @@
-const IMPACT_LETTERS = "[tmiuw]"
-const IMPACT_CODES = "t temporary, m modifiable, i irreversible, u unknown, w won't change now"
+// Changeability codes on unmet values and incapability hosts
+const CHANGEABILITY_LETTERS = "[tmiuw]"
+const CHANGEABILITY_CODES = "t temporary (usually able, not this moment), m modifiable, i irreversible, u unknown, w won't change now"
 const POS_D = "\\+[a-z]\\b"
-const NEG_D = `\\-[a-z]${IMPACT_LETTERS}\\b`
+const NEG_D = `\\-[a-z]${CHANGEABILITY_LETTERS}\\b`
 const VALUE = `(?:${POS_D}|${NEG_D})`
-const NEG_VALUE_NOTE = ` Negative tags append impact reversibility (${IMPACT_CODES}); e.g. <b>-at</b> = unmet autonomy, temporary.`
+const NEG_VALUE_NOTE = ` Negative tags append changeability (${CHANGEABILITY_CODES}); e.g. <b>-at</b> = unmet autonomy, temporary (usually able, not this moment).`
 const VALUE_TAGS = "a/c/r/p/s/u"
 const VALUE_WORDS = "[autonomy, competence, relatedness, pleasure, survival, unspecified]"
+
+// Incapability: capability-denial hosts get _[tmiuw] (same changeability codes)
+const INCAP_HOSTS = String.raw`(?:can't|cannot|unable|incapable|impossible)`
+const INCAP_VIOLATION = String.raw`\b${INCAP_HOSTS}\b`
+const INCAP_FOLLOWED = String.raw`\b${INCAP_HOSTS}_${CHANGEABILITY_LETTERS}\b`
+const INCAP_SHOW_MORE = `Capability denials often smuggle permanence. Tag the host with changeability — the same codes as unmet values: ${CHANGEABILITY_CODES}. Plain-language gloss: <b>_t</b> usually able but not this moment; <b>_m</b> modifiable (effort may change it); <b>_i</b> impossible (as far as you can tell); <b>_w</b> choice (won't change now); <b>_u</b> unknown. Examples: <b>can't_t</b>  right now; <b>can't_m</b> swim yet; <b>impossible_i</b> for me to do; <b>can't_w</b> attend tonight (because I don't want to); <b>incapable_u</b> of leading this (because I don't know how).`
 
 // Mindfulness noting: first-person attitude/stance verbs that often mark rumination get _l/_h/_f/_s/_t/_m
 const NOTE_LETTERS = "[lhfstm]"
@@ -119,6 +126,14 @@ const rules = [{
         points: 1,
         description: `Remove <b>{match}</b> and consider why you're really doing it. ${VALUE_WORDS} (${VALUE_TAGS})`,
         showMore: `<b>Need to</b> and <b>have to</b> can disguise a real emotional motive or make choices feel coerced. Removing them and naming the value you intend to fill — ${VALUE_WORDS} (${VALUE_TAGS}) — makes the reason explicit and puts you back in choice. Example: instead of "I have to apologize," consider "I+r am apologizing" (to restore relatedness).`
+    }, {
+        // capability denial: append changeability (same codes as unmet values)
+        name: "Incapability",
+        violation: INCAP_VIOLATION,
+        followed: INCAP_FOLLOWED,
+        points: 1,
+        description: `Append changeability to <b>{match}</b>: _[t,m,i,u,w] (${CHANGEABILITY_CODES}).`,
+        showMore: INCAP_SHOW_MORE
     }, {
         // checks for single problems/solutions/goals
         name: "Numbered alternatives",
