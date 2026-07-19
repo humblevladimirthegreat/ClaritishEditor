@@ -1,5 +1,5 @@
-const IMPACT_LETTERS = "[temhiu]"
-const IMPACT_CODES = "t temporary, e easy, m medium, h hard, i irreversible, u unknown"
+const IMPACT_LETTERS = "[tmiuw]"
+const IMPACT_CODES = "t temporary, m modifiable, i irreversible, u unknown, w won't change now"
 const POS_D = "\\+[a-z]\\b"
 const NEG_D = `\\-[a-z]${IMPACT_LETTERS}\\b`
 const VALUE = `(?:${POS_D}|${NEG_D})`
