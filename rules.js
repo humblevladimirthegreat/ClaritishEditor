@@ -71,12 +71,12 @@ const rules = [{
         showMore: "<b>eor</b> (exhaustive or) means the listed options are the only ones possible; <b>ior</b> (inexhaustive or) means other options may exist too. Marking which kind of \"or\" you mean makes False Dichotomies easier to catch — when someone says only A or B is possible, hearing <b>eor</b> prompts both speaker and listener to ask whether the list is truly complete. Example: \"You are either with us <b>eor</b> against us\" invites the question: are there other stances besides those two?"
     }, {
         // normative overgeneralization (should as universal rule)
-        name: "Implies that",
-        violation: /\bshould\b/i,
-        followed: /\bimplies that\b/i,
+        name: "Value-tagged should",
+        violation: String.raw`\bshould\b(?!${VALUE})`,
+        followed: String.raw`\bshould${VALUE}`,
         points: 1,
-        description: "Replace <b>{match}</b> with \"x implies that...\".",
-        showMore: "<b>Should</b> often smuggles a personal or cultural preference in as a universal law. Replacing it with <b>x implies that...</b> forces you to name whose standard it is (fact, preference, or source). Example: instead of \"hard work should earn a promotion,\" write \"my desire implies that large effort is sufficient for a promotion\" — making clear it is your hope, not a universal rule, and inviting you to look for exceptions."
+        description: `Append a value tag (a/c/r/p/u for ${VALUE_WORDS}) to <b>{match}</b> to name which value the ought serves or protects.`,
+        showMore: `<b>Should</b> often smuggles a personal or cultural preference in as a universal law. Tagging it with a value marker forces you to name what is at stake instead of treating the ought as self-evident. Tags: <b>+a</b> autonomy, <b>+c</b> competence, <b>+r</b> relatedness, <b>+p</b> pleasure, <b>+u</b> unspecified (or <b>-</b> when unmet). Example: instead of "I should apologize," write <b>should+r</b> (relatedness); instead of "hard work should earn a promotion," write <b>should+c</b> (competence).`
     }, {
         // checks for future tense
         name: "Plan or predict",
